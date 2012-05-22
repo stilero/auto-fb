@@ -257,6 +257,7 @@ class plgSystemAutofbook extends JPlugin {
     private function setupClasses() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         //$this->preloadClasses();
+        //$token = $this->params->def('fbpage_auth_token') == '' ? $this->fbOauthAccessToken : $this->params->def('fbpage_auth_token');
         $this->CheckClass = new $this->classes['fbControllerClass']['name']( 
             array(
                 'fbAppID'               =>      $this->fbAppID,
@@ -388,7 +389,8 @@ class plgSystemAutofbook extends JPlugin {
         $imageSrc = $article->image; 
         $imageSrc = ( $imageSrc != '' )? $imageSrc : JURI::root().'images'.DS.$this->params->def('og-img-default');
         $descNeedles = array("\n", "\r", "\"", "'");
-        $desc = (isset($article->description) )? strip_tags( str_replace($descNeedles, " ", $article->description )) : "";
+        //$desc = (isset($article->description) )? strip_tags( str_replace($descNeedles, " ", $article->description )) : "";
+        $desc = (isset($article->description) )? $article->description  : "";
         $joomlaConfig = JFactory::getConfig();
         $joomlaSiteName = $joomlaConfig->getValue( 'config.sitename' );
         $langObj = JFactory::getLanguage();

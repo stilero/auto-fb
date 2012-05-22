@@ -139,12 +139,15 @@ class jArticle {
     }
     
     public function description($article){
-        $description = isset($article->text) ? substr(htmlentities(strip_tags($article->text)), 0, 150) : '';
-        if(isset($article->introtext)){
-            $description = htmlentities(strip_tags($article->introtext));
-        }elseif (isset($article->metadesc)) {
-            $description = htmlentities(strip_tags($article->metadesc));
+        $description = $article->text!="" ? $article->text : '';
+        if(isset($article->introtext) && $article->introtext!=""){
+            $description = $article->introtext;
+        }elseif (isset($article->metadesc) && $article->metadesc!="" ) {
+            $description = $article->metadesc;
         }
+        $descNeedles = array("\n", "\r", "\"", "'");
+        str_replace($descNeedles, " ", $description );
+        $description = substr(htmlentities(strip_tags($description)), 0, 250);
         return $description;
     }
     
@@ -205,7 +208,7 @@ class jArticle {
         $currentDate = $date->toMySQL();
         if ( ($publishUp > $currentDate) ){
             return FALSE;
-        }else if($publishDown < $currentDate && $publishDown != '0000-00-00 00:00:00'){
+        }else if($publishDown < $currentDate && $publishDown != '0000-00-00 00:00:00' && $publishDown!=""){
             return FALSE;
         }else {
             return TRUE;

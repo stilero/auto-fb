@@ -93,6 +93,7 @@ class FBookClass {
     public function postStatusMessageToFB($statusMessage){
         $this->doCheckBeforePosting();
         if( !$this->hasErrorOccured()) {
+            $this->setOauthAccessToken($this->fetchPageAdminToken());
             $response = $this->doPostMessageToFB($statusMessage);
             $this->handleResponse($response);
             return;
@@ -113,9 +114,9 @@ class FBookClass {
 //            }
 //            $this->setOauthAccessToken($this->findTokenInResponse($response));
 //        }
-        $accesstoken = $this->transformCodeToToken();
-        if($this->hasErrorOccured()) return;
-        //$accesstoken = $this->getOauthAccessToken();
+        //$accesstoken = $this->transformCodeToToken();
+        //if($this->hasErrorOccured()) return;
+        $accesstoken = $this->getOauthAccessToken();
         if( isset($accesstoken) ){
             $this->tryGraphQuery();
         }else{
@@ -157,7 +158,7 @@ class FBookClass {
 //        }
     }
     
-    private function fetchPageAdminToken(){
+    public function fetchPageAdminToken(){
         $userToken = $this->getOauthAccessToken();
         //$pageToken = $this->getOauthAccessToken(TRUE);
         

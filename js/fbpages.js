@@ -1,7 +1,7 @@
 window.addEvent('domready', function(){
     var pageID = $(fbPageIdElement).value;
     var defaultSelectList = $(fbPagesElement).get('html');  
-    
+    var pages = new Array();
     var setPageSelection = function(){
         if(pageID == ''){
             pageID = $(fbPagesElement).get('value');
@@ -18,10 +18,13 @@ window.addEvent('domready', function(){
                 alert(errormsg);
         }else{
             //get the current options selectId's options
+            //evalResponse(response, 'data');
             var options = $(fbPagesElement).get('html'); 
             $each(response.data, function(value, key){
                 var selected = (value.id == pageID) ? ' selected="selected" ' : '';
                 if(value.category != 'Application'){
+                    //Object.append(pages, {'id': value.id, 'access_token': value.access_token});
+                    pages[value.id] = value.access_token;
                     options = options + '<option value="' + value.id + '"'+selected+'>' + value.name + '</option>';
                 }
                //var newoption = new Option("option html", "option value");
@@ -82,6 +85,7 @@ window.addEvent('domready', function(){
     $(fbPagesElement).addEvent('change', function(){
         pageID = $(fbPagesElement).get('value');
         $(fbPageIdElement).value = pageID;
+        $(fbPageAuthTokenElement).value = pages[pageID];
     });
     
     $(accessTokenElement).addEvent('change', function(){

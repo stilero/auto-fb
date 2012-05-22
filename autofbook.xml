@@ -108,6 +108,7 @@
                 <field name="fbadmin" type="fbadmin" label="" />
                 <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
                 <field name="fb_page_id" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+                <field name="fbpage_auth_token" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
                 <field name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
                         <option value="1">Yes</option>
                         <option value="0">No</option>

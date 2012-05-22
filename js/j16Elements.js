@@ -6,3 +6,4 @@ var accessTokenElement = 'jform_params_auth_token';
 var fbAdminElement = 'jform_params_fbadmin';
 var fbPagesElement = 'jform_params_fb_pages';
 var fbPageIdElement = 'jform_params_fb_page_id';
+var fbPageAuthTokenElement = 'jform_params_fbpage_auth_token';
