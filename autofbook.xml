@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="1.5" type="plugin" group="system" method="upgrade">
+    <name>System - AutoFBook Plugin</name>
+    <author>Daniel Eliasson (www.stilero.com)</author>
+    <creationDate>Feb 22, 2012</creationDate>
+    <copyright>Copyright (c) 2011 Stilero AB. All rights reserved.</copyright>
+    <authorEmail>joomla@stilero.com</authorEmail>
+    <authorUrl>www.stilero.com</authorUrl>
+    <version>4.0</version>
+    <license>GPLv2</license>
+    <description>This plugin automatically posts your articles on your FaceBook status. If you like this plugin, show your love and write a review at http://extensions.joomla.org</description>
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">autofbook/sql/autofbook_install.sql</file>
+        </sql>
+    </install>
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">autofbook/sql/autofbook_uninstall.sql</file>
+        </sql>
+    </uninstall>
+    <media destination="plg_autofbook">
+        <folder>js</folder>
+        <folder>images</folder>
+    </media>
+    <files>
+        <filename plugin="autofbook">autofbook.php</filename>
+        <folder>autofbook</folder>
+    </files>
+    <languages folder="language">
+        <language tag="en-GB">en-GB.plg_system_autofbook.ini</language>
+        <language tag="en-GB">en-GB.plg_system_autofbook.sys.ini</language>
+        <language tag="sv-SE">sv-SE.plg_system_autofbook.ini</language>
+        <language tag="fr-FR">fr-FR.plg_system_autofbook.ini</language>
+    </languages>
+    <!-- Standard plugin parameters for Joomla! 1.5 -->
+
+    <params>
+        <param name="section_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"/>
+        <param name="fb_page_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+        <param name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+        </param>
+        <param name="fb_post_type" type="list" default="0" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC">
+                <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
+                <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
+        </param>	
+        <param name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
+    </params>
+    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addfieldpath="/plugins/system/autofbook/elements">
+            <param type="register" default=""/>
+            <param name="fb_app_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
+            <param name="fb_app_secret" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
+            <param type="authorize" default=""/>
+            <param name="auth_token" type="password"  default=""  label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
+            <param name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC" />
+            <param name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
+            <param name="pingmessages" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+            </param>
+            <param name="add_ogtags" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC">
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+            </param>
+    </params>
+
+    <!-- Standard plugin parameters for Joomla! 1.6+ -->
+    <config>
+            <fields name="params">
+                    <fieldset name="settings" label="PLG_SYSTEM_AUTOFBOOK_SETTINGS">
+                            <field name="section_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"/>
+                            <field name="fb_page_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+                            <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+                            <field name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                            </field>
+                            <field name="fb_post_type" type="list" default="0" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC">
+                                    <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
+                                    <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
+                            </field>	
+                            <field name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
+                    </fieldset>
+                    <fieldset name="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addfieldpath="/plugins/system/autofbook/autofbook/elements">
+                            <field name="register" type="register" label="" />
+                            <field name="authorize" type="authorize" label="" />
+                            <field name="fbadmin" type="fbadmin" label="" />
+                            <field name="fb_app_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
+                            <field name="fb_app_secret" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
+                            <field name="auth_token" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
+                            <field name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
+                            <field name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
+                            <field name="pingmessages" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                            </field>
+                            <field name="add_ogtags" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                            </field>
+                    </fieldset>
+            </fields>
+    </config>
+    <administration>
+        <languages folder="language">
+            <language tag="en-GB">en-GB.plg_system_autofbook.ini</language>
+            <language tag="en-GB">en-GB.plg_system_autofbook.sys.ini</language>
+            <language tag="sv-SE">sv-SE.plg_system_autofbook.sys.ini</language>
+            <language tag="sv-SE">sv-SE.plg_system_autofbook.ini</language>
+            <language tag="fr-FR">fr-FR.plg_system_autofbook.ini</language>
+        </languages>
+    </administration>
+</install>
