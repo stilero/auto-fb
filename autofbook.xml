@@ -22,6 +22,7 @@
     <media destination="plg_autofbook">
         <folder>js</folder>
         <folder>images</folder>
+        <folder>css</folder>
     </media>
     <files>
         <filename plugin="autofbook">autofbook.php</filename>
@@ -48,11 +49,16 @@
         </param>	
         <param name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
     </params>
-    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addfieldpath="/plugins/system/autofbook/elements">
-            <param type="register" default=""/>
+    <!--
+    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addpath="/plugins/system/autofbook/elements">
+    -->
+    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addpath="/plugins/system/autofbook/elements">
+            <param name="register" type="register" default=""/>
             <param name="fb_app_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
             <param name="fb_app_secret" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
-            <param type="authorize" default=""/>
+            <!--
+            <param name="authorize" type="authorize" default=""/>
+            -->
             <param name="auth_token" type="password"  default=""  label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
             <param name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC" />
             <param name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
@@ -68,40 +74,69 @@
 
     <!-- Standard plugin parameters for Joomla! 1.6+ -->
     <config>
-            <fields name="params">
-                    <fieldset name="settings" label="PLG_SYSTEM_AUTOFBOOK_SETTINGS">
-                            <field name="section_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"/>
-                            <field name="fb_page_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
-                            <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
-                            <field name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                            </field>
-                            <field name="fb_post_type" type="list" default="0" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC">
-                                    <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
-                                    <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
-                            </field>	
-                            <field name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
-                    </fieldset>
-                    <fieldset name="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addfieldpath="/plugins/system/autofbook/autofbook/elements">
-                            <field name="register" type="register" label="" />
-                            <field name="authorize" type="authorize" label="" />
-                            <field name="fbadmin" type="fbadmin" label="" />
-                            <field name="fb_app_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
-                            <field name="fb_app_secret" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
-                            <field name="auth_token" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
-                            <field name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
-                            <field name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
-                            <field name="pingmessages" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                            </field>
-                            <field name="add_ogtags" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                            </field>
-                    </fieldset>
-            </fields>
+        <fields name="params">
+            <fieldset name="settings" label="PLG_SYSTEM_AUTOFBOOK_SETTINGS">
+                    <!--
+                    <field name="section_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"/>
+                    -->
+                    <field 
+                        name="section_id"
+                        type="SQL"
+                        class="inputbox"
+                        label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
+                        multiple="true"
+                        translate="true"
+                        query="SELECT id, title FROM #__categories WHERE extension='com_content' AND published = 1 ORDER BY title ASC"
+                        key_field="id"
+                        value_field="title"
+                        description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
+                    >
+                    </field>
+                    <field name="incl_excl" type="radio" default="0" label="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL" description="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL_DESC">
+                        <option value="0">PLG_SYSTEM_AUTOFBOOK_INCLUDE</option>
+                        <option value="1">PLG_SYSTEM_AUTOFBOOK_EXCLUDE</option>
+                    </field>
+                    <field name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
+            </fieldset>
+            <fieldset name="advanced" label="PLG_SYSTEM_AUTOFBOOK_FBSETTINGS" addfieldpath="/plugins/system/autofbook/autofbook/elements">
+                <field name="register" type="register" label="" />
+                <field name="fb_app_id" type="text" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
+                <field name="fb_app_secret" type="password" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
+                <field name="auth_token" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
+                <field name="auth_code" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
+                <field name="authorize" type="authorize" label="" />
+                <field name="fbadmin" type="fbadmin" label="" />
+                <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+                <field name="fb_page_id" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
+                <field name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                </field>
+                <field name="fb_post_type" type="list" default="0" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC">
+                        <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
+                        <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
+                </field>	
+                <field name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
+                <field name="pingmessages" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                </field>
+                <field name="add_ogtags" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                </field>
+                <field 
+                    name="og-img-default" 
+                    type="imagelist" 
+                    hide_default="true" 
+                    directory="images" 
+                    default="" 
+                    label="PLG_SYSTEM_AUTOFBOOK_OG_DEFAULT_IMG" 
+                    description="PLG_SYSTEM_AUTOFBOOK_OG_DEFAULT_IMG_DESC"
+                />
+
+            </fieldset>
+        </fields>
     </config>
     <administration>
         <languages folder="language">

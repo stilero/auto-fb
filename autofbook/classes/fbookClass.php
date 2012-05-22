@@ -200,6 +200,10 @@ class FBookClass {
         );
         $fbpage = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
         $graphfeed_url = $this->config['graphURL'].$fbpage."feed";
+        if($this->config['debug']){
+            JError::raiseNotice('0', 'Posting. Link:'.$link.' Name:'.$name);
+            return;
+        }
         return $this->doQueryFB($graphfeed_url, $postvars);
     }
     

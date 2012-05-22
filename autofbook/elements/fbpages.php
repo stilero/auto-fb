@@ -87,16 +87,10 @@ if(version_compare(JVERSION, '1.6.0', '<')){
         private $config;
 
         function fetchElement($name, $value, &$node, $control_name){
-            $document =& JFactory::getDocument();
-            $this->config = array(
-                'jsAsset'       =>      'js/jsFile.js',
-                'cssAsset'      =>      'assets/cssFile.css'
-            );
-            $base_path = JURI::root(true).'/plugins/content/';
-            $document->addScript($base_path.$this->config['jsAsset']);
-            $document->addStyleSheet($base_path.$this->config['cssAsset']);
-            $htmlCode = '<textarea  id="' . $control_name.$name . '" name="' . $control_name.'['.$name.']' . '" value="' . $value . '" rows="5" cols="30" ></textarea>';
-            return $htmlCode;
+            fbPages::addJs15();
+            fbPages::addJsGeneral();
+            fbPages::addTranslationJS();
+            return fbPages::pagesList($control_name.$name, $name);
         }
         function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
             
@@ -108,7 +102,6 @@ if(version_compare(JVERSION, '1.6.0', '<')){
     */
     class JFormFieldFbpages extends JFormField {
         protected $type = 'fbpages';
-        private $config;
 
         protected function getInput(){
             fbPages::addJs16();
@@ -118,8 +111,8 @@ if(version_compare(JVERSION, '1.6.0', '<')){
         }
         
         protected function getLabel(){
-            $toolTip = JText::_('tooltip');
-            $text = JText::_('tooltip text');
+            $toolTip = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_TEXT);
+            $text = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_LABEL);
             $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$text.'::'.$toolTip.'">'.$text.'</label>';
             return $labelHTML;
         }

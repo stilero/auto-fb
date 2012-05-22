@@ -3,7 +3,8 @@ window.addEvent('domready', function(){
     var appSecret = $(appSecretElement).value;
     var redirectURI = catcherURI;
     var authCode = $(authCodeElement).value;
-
+    var authElmnt = $(authorizeElement).get('html');
+    var loader = '<span class="ajaxloader-blue"></span>';
         
     var setButtonHref = function(){
         var link = 'https://www.facebook.com/dialog/oauth' + 
@@ -12,20 +13,27 @@ window.addEvent('domready', function(){
             '&scope=publish_stream,share_item,offline_access,manage_pages';
             $( authorizeElement).href = link;
         if($(accessTokenElement).value == ''){
-            $( authorizeElement).set('class', 'fb-connect');
+            $( authorizeElement).set('class', 'fbconnect');
             $( authorizeElement).text = 'Connect to FB';
         }else{
-            $( authorizeElement).set('class', 'fb-connect-remove');
+            $( authorizeElement).set('class', 'fbdisconnect');
             $( authorizeElement).text = 'Remove FB Connection';
         }
+    };
+    var clearAuthorization = function(){
+        $(authCodeElement).value = '';
+        $(fbPageIdElement).value = '';
+        $(accessTokenElement).value = '';
+        setButtonHref();
+        $(accessTokenElement).fireEvent('change');
     };
     
     $( authorizeElement).addEvent('click', function(e){
         if($(accessTokenElement).value != ''){
             e.preventDefault();
-            $(authCodeElement).value = '';
-            $(accessTokenElement).value = '';
-            setButtonHref();
+            clearAuthorization();
+        }else{
+            showLoader();
         }
     });
     
@@ -41,6 +49,21 @@ window.addEvent('domready', function(){
         }
     };
     
+    var showLoader = function(){
+        $(authorizeElement).set('html', authElmnt + loader);   
+    };
+    
+    var hideLoader = function(){
+        $(authorizeElement).set('html', authElmnt);   
+    };
+    
+    var postAuthorization = function(){
+        $(authCodeElement).value = '';
+        //alert(PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS);
+        $(accessTokenElement).fireEvent('change');
+        setButtonHref();
+    }
+    
     var handleResponse = function(response){
         if(!$defined(response.access_token)){
             var errormsg = '(' + response.code + ')' +
@@ -48,14 +71,18 @@ window.addEvent('domready', function(){
                 response.message;
                 alert(errormsg);
         }else{
+            //$(accessTokenElement).value = response.access_token;
+            //postAuthorization();
+            
             $(accessTokenElement).value = response.access_token;
-            $(authCodeElement).value = '';        
-            alert(PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS);
+            postAuthorization();
         }
     };
     
     var requestAccessToken = function(){
         authCode = $(authCodeElement).value;
+        
+
         var reqUrl = helpersURI + 'authorizer.php';
         var myRequest = new Request.JSON({
             url: reqUrl,
@@ -65,15 +92,20 @@ window.addEvent('domready', function(){
                 'code': authCode,
                 'redirect_uri': catcherURI
             },
+            onRequest: function(){
+            },
             onSuccess: function(response){
                 handleResponse(response);
             },
             onFailure: function(response){
                 alert(PLG_SYSTEM_AUTOFBOOK_JS_FAILURE + response.status);
+            },
+            onComplete: function(){
+                $(authorizeElement).set('html', authElmnt);
             }
         });
         
-        myRequest.send();    
+        myRequest.cancel().send();    
     };
     
     displayButton();

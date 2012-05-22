@@ -38,6 +38,12 @@ class fbAdmin{
         return $assetsPath;
     }
     
+    static function addCssFile(){
+        $cssPath = self::assetsPath().'css'.DS.'settings.css';
+        $document =& JFactory::getDocument();
+        $document->addStyleSheet($cssPath);
+    }
+    
     static function imgPath(){
         $imgPath = self::assetsPath().'images'.DS;
         return $imgPath;
@@ -53,12 +59,18 @@ class fbAdmin{
         $document->addScript(self::jsPath().'fbadmin.js');
     }
     
-    static function adminAuthorized($id){
+    static function authorizedAdmin($id){
         $htmlCode =
         '<span id="'.$id.'" class="readonly">'.
         JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBADMIN_NOT_AUTHORIZED).
-        '</span>';
+        '</span>'.
+        self::loaderImage($id);
         return $htmlCode;
+    }
+    
+    static function loaderImage($id){
+        $imgHTML = '<span id="'.$id.'_loader" class="readonly"><img src="'.self::imgPath().'ajax-loader.gif" width="16" height="11"></span>';
+        return ;
     }
     
     static function addJs15(){
@@ -75,6 +87,7 @@ class fbAdmin{
         $document =& JFactory::getDocument();
         $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS).'";';
         $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_FAILURE).'";';
+        $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED).'"';
         $document->addScriptDeclaration($jsTranslationStrings);        
     }
 }
@@ -87,16 +100,11 @@ if(version_compare(JVERSION, '1.6.0', '<')){
         private $config;
 
         function fetchElement($name, $value, &$node, $control_name){
-            $document =& JFactory::getDocument();
-            $this->config = array(
-                'jsAsset'       =>      'js/jsFile.js',
-                'cssAsset'      =>      'assets/cssFile.css'
-            );
-            $base_path = JURI::root(true).'/plugins/content/';
-            $document->addScript($base_path.$this->config['jsAsset']);
-            $document->addStyleSheet($base_path.$this->config['cssAsset']);
-            $htmlCode = '<textarea  id="' . $control_name.$name . '" name="' . $control_name.'['.$name.']' . '" value="' . $value . '" rows="5" cols="30" ></textarea>';
-            return $htmlCode;
+            fbAdmin::addCssFile();
+            fbAdmin::addJs15();
+            fbAdmin::addJsGeneral();
+            fbAdmin::addTranslationJS();
+            return fbAdmin::authorizedAdmin($control_name.$name);
         }
         function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
             
@@ -108,13 +116,13 @@ if(version_compare(JVERSION, '1.6.0', '<')){
     */
     class JFormFieldFbadmin extends JFormField {
         protected $type = 'fbadmin';
-        private $config;
 
         protected function getInput(){
+            fbAdmin::addCssFile();
             fbAdmin::addJs16();
             fbAdmin::addJsGeneral();
             fbAdmin::addTranslationJS();
-            return fbAdmin::adminAuthorized($this->id);
+            return fbAdmin::authorizedAdmin($this->id);
         }
         
         protected function getLabel(){

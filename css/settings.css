@@ -1,0 +1,40 @@
+/* 
+    Document   : settings
+    Created on : 2012-maj-22, 12:20:19
+    Author     : Daniel Eliasson - joomla at stilero.com
+    Description:
+        Stylesheet for the plugin settings
+*/
+
+.ajaxloader { 
+    background:#ffffff url('../../../media/plg_autofbook/images/ajax-loader.gif') no-repeat right top;
+    padding-right:20px;
+}
+.ajaxloader-blue { 
+    background: url('../../../media/plg_autofbook/images/ajax-loader-blue.gif') no-repeat right top;
+    width:16px;
+    height:11px;
+    padding-right:23px;
+}
+.fbdisconnect, .fbconnect{
+    width:174px;
+    height:26px;
+    line-height: 26px;
+    padding-left:30px;
+    display:block;
+    text-align: center;
+    color:#fff;
+}
+.fbdisconnect{
+    background:#ffffff url('../../../media/plg_autofbook/images/fb-disconnect-btn.png') no-repeat right top;
+}
+.fbconnect{
+    background:#ffffff url('../../../media/plg_autofbook/images/fb-connect-btn.png') no-repeat right top;
+}
+.readonly .fbconnect, .readonly .fbdisconnect{
+    color:#fff;
+}
+.readonly .fbconnect:hover, .readonly .fbdisconnect:hover{
+    text-decoration: none;
+}
+

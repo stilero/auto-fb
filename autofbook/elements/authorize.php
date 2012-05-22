@@ -67,6 +67,7 @@ $jsVars = <<<EOD
 EOD;
     $document =& JFactory::getDocument();
     $document->addScriptDeclaration($jsVars);
+    $document->addScript('https://ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js');
     $document->addScript(self::jsPath().'j15Elements.js');
 }
 
@@ -91,6 +92,7 @@ EOD;
             '<span class="readonly">'.
             '<a '.
             'id="'.$id.'" '.
+            'class="fbconnect" '.
             'title="'.JText::_('MOD_INSTAGRAM_AUTHORIZE').'" '.
             'href="'.$link.'" '.
             'target="_blank" >'.
@@ -115,10 +117,9 @@ if(version_compare(JVERSION, '1.6.0', '<')){
     * @since J1.5
     */
     class JElementAuthorize extends JElement{
-        private $config;
 
         function fetchElement($name, $value, &$node, $control_name){
-            //fbauthorize::addJs15();
+            fbauthorize::addJs15();
             fbauthorize::addJsGeneral();
             fbauthorize::addTranslationJS();
             return fbauthorize::connectButton($control_name.$name);
