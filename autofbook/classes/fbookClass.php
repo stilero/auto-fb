@@ -2,7 +2,7 @@
 /**
  * A Class for communication with Facebook
  *
- * @version $Id: fbookClass.php 27 2012-02-22 15:49:51Z webbochsant@gmail.com $
+ * @version $Id: fbookClass.php 27 2012-05-25 15:49:51Z webbochsant@gmail.com $
  * @author danieleliasson Stilero AB - http://www.stilero.com
  * @copyright 2011-dec-22 Stilero AB
  * @license GPLv2
@@ -62,7 +62,7 @@ class FBookClass {
                 'graphAccessToken'      =>  'https://graph.facebook.com/oauth/access_token',
                 'graphFeedURL'          =>  'https://graph.facebook.com/me',
                 'graphURL'              =>  'https://graph.facebook.com/',
-                'curlUserAgent'         =>  'oauthTweet - www.stilero.com',
+                'curlUserAgent'         =>  'oauthFBClass - www.stilero.com',
                 'curlConnectTimeout'    =>  20,
                 'curlTimeout'           =>  20,
                 'curlReturnTransf'      =>  true,
@@ -73,6 +73,7 @@ class FBookClass {
                 'curlEncoding'          =>  false,
                 'curlHeader'            =>  false,
                 'curlHeaderOut'         =>  true,
+                'postToPageAsAdmin'     =>  true,     
                 'debug'                 =>  false,
                 'eol'                   =>  "<br /><br />"
             );
@@ -82,40 +83,47 @@ class FBookClass {
     } 
     
     public function postLinkToFB($link, $name=""){
-        $this->doCheckBeforePosting();
-        if( !$this->hasErrorOccured() && (isset($this->fbOauthAccessToken) || isset($this->fbOauthCode)) ) {
-            $response = $this->doPostLinkToFB($link, $name);
-            $this->handleResponse($response);
-            return;
-        }
-    }
-    
-    public function postStatusMessageToFB($statusMessage){
-        $this->doCheckBeforePosting();
-        if( !$this->hasErrorOccured()) {
-            $this->setOauthAccessToken($this->fetchPageAdminToken());
-            $response = $this->doPostMessageToFB($statusMessage);
-            $this->handleResponse($response);
-            return;
-        }
-    }
-    
-    private function doCheckBeforePosting(){
+        $this->prepareToken();
         if($this->hasErrorOccured()){
             return;
         }
-//        if(isset($this->fbOauthCode)){
-//            $response = $this->requestAccessTokenForApp();
-//            if( $this->hasErrorOccured() && $this->getErrorMessage() == 'Error validating verification code.'){
-//                $this->requestPermissionsForApp();
-//                return;
-//            }  elseif ($this->hasErrorOccured()) {
-//               return;
-//            }
-//            $this->setOauthAccessToken($this->findTokenInResponse($response));
-//        }
-        //$accesstoken = $this->transformCodeToToken();
-        //if($this->hasErrorOccured()) return;
+        $postvars = array( 
+            'access_token'  =>  $this->fbOauthAccessToken,
+            'method'        =>  'post',
+            'link'          =>  $link,
+            'name'          =>  $name
+        );
+        $fbPageID = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
+        $graphURL = $this->config['graphURL'].$fbPageID."feed";
+        $response = $this->query($graphURL, $postvars);
+        $this->handleResponse($response);
+        return !$this->hasErrorOccured();
+        //}
+    }
+    
+    public function postStatusMessageToFB($message){
+        $this->prepareToken();
+        if( $this->hasErrorOccured()) {
+            return;
+        }
+        $postvars = array( 
+            'access_token'  =>  $this->fbOauthAccessToken,
+            'method'        =>  'post',
+            'message'       =>  $message,
+        );
+        $fbPageID = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
+        $graphURL = $this->config['graphURL'].$fbPageID."feed";
+        $response = $this->query($graphURL, $postvars);
+        $this->handleResponse($response);
+        return !$this->hasErrorOccured();
+    }
+    
+    private function prepareToken(){
+        if($this->hasErrorOccured()){
+            return;
+        }
+        $this->authCodeToAuthToken();
+        if($this->hasErrorOccured()) return;
         $accesstoken = $this->getOauthAccessToken();
         if( isset($accesstoken) ){
             $this->tryGraphQuery();
@@ -144,29 +152,16 @@ class FBookClass {
         if( $this->getErrorCode() == self::ERROR_COMMUNICATION_FAULT){
             return false;
         }
-       
-//        if($this->getFBPageID() != ""){
-//            $pageAuthResponse = $this->requestAdminTokenForPage();
-//            if($this->hasErrorOccured()) return;
-//            $pageAdminAuthToken = $this->findPageAdminTokenInJsonResponse($pageAuthResponse);
-//            if($pageAdminAuthToken){
-//                $this->fbOauthUserAccessToken = $pageAdminAuthToken;
-//            }else{
-//                $this->setNotice('Could not get admin rights for page '.$this->getFBPageID().', posting to personal wall.');
-//                $this->setFBPageId('');
-//            }
-//        }
+        $this->fetchPageAdminToken();
     }
     
-    public function fetchPageAdminToken(){
-        $userToken = $this->getOauthAccessToken();
-        //$pageToken = $this->getOauthAccessToken(TRUE);
-        
-        if($this->getFBPageID() != ""){
+    private function fetchPageAdminToken(){
+        $userToken = $this->fbOauthAccessToken;
+        if($this->getFBPageID() != "" && $this->willPostToPageAsAdmin()===TRUE){
             $response = $this->requestAdminTokenForPage();
             if($this->hasErrorOccured()) return;
             $pageToken = $this->findPageAdminTokenInJsonResponse($response);
-            $this->setOauthAccessToken($pageToken, TRUE);
+            $this->setOauthAccessToken($pageToken);
         }
         if(!$this->tryGraphQuery(true)){
             $this->setOauthAccessToken($userToken);
@@ -175,7 +170,7 @@ class FBookClass {
         }
     }
     
-    private function transformCodeToToken(){
+    private function authCodeToAuthToken(){
         if(isset($this->fbOauthCode)){
             $response = $this->requestAccessTokenForApp();
             if( $this->hasErrorOccured() && $this->getErrorMessage() == 'Error validating verification code.'){
@@ -190,35 +185,6 @@ class FBookClass {
         return $this->getOauthAccessToken();
     }
 
-    private function doPostLinkToFB($link, $name){
-        $isPageQuery = ($this->config['fbPageID']!="") ? true : false;
-        $token = $this->getOauthAccessToken($isPageQuery);
-        $postvars = array( 
-            'access_token'  =>  $token,
-            'method'        =>  'post',
-            'link'          =>  $link,
-            'name'          =>  $name
-        );
-        $fbpage = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
-        $graphfeed_url = $this->config['graphURL'].$fbpage."feed";
-        if($this->config['debug']){
-            JError::raiseNotice('0', 'Posting. Link:'.$link.' Name:'.$name);
-            return;
-        }
-        return $this->doQueryFB($graphfeed_url, $postvars);
-    }
-    
-    private function doPostMessageToFB($message){
-        $postvars = array( 
-            'access_token'  =>  $this->fbOauthAccessToken,
-            'method'        =>  'post',
-            'message'       =>  $message,
-        );
-        $fbpage = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
-        $graphfeed_url = $this->config['graphURL'].$fbpage."feed";
-        return $this->doQueryFB($graphfeed_url, $postvars);
-    }
-    
     private function tryGraphQuery($isPageQuery=false){
         $header = $this->buildHTTPHeader();
         $graphURL = $this->config['graphFeedURL'];
@@ -227,12 +193,11 @@ class FBookClass {
             'access_token' =>  $token,
         );
         $tokenURL = $graphURL ."?". http_build_query($postVars);
-        $response = $this->doQueryFB($tokenURL, $postVars, FALSE, $header);
+        $response = $this->query($tokenURL, $postVars, FALSE, $header);
         return !$this->hasErrorOccured();
-        
     }
     
-    public function findTokenInResponse($response){
+    private function findTokenInResponse($response){
         $match;
         $regexp = "#^access_token=([^&]+)#i";
         preg_match_all($regexp, $response, $matches);
@@ -276,7 +241,7 @@ class FBookClass {
             'grant_type' => 'manage_pages'
         );
         $tokenURL = $graphURL ."?". http_build_query($postVars);
-        $response = $this->doQueryFB($tokenURL, $postVars, FALSE, $header);
+        $response = $this->query($tokenURL, $postVars, FALSE, $header);
         return $response;
 
     }
@@ -308,7 +273,7 @@ class FBookClass {
             'grant_type'    =>  'fb_exchange_token',
             'fb_exchange_token' =>  $this->fbOauthAccessToken
         );
-        return $this->doQueryFB($this->config['graphAccessToken'], $postVars);
+        return $this->query($this->config['graphAccessToken'], $postVars);
     }
     
     private function validateToken(){
@@ -318,7 +283,7 @@ class FBookClass {
             'redirect_uri'    =>  $this->config['redirectURI'],
             'code' =>  $this->fbOauthAccessToken
         );
-        return $this->doQueryFB($this->config['graphAccessToken'], $postVars);
+        return $this->query($this->config['graphAccessToken'], $postVars);
     }
     
     public function getOAuthDialogURL(){
@@ -337,11 +302,10 @@ class FBookClass {
             'redirect_uri'    =>  $this->config['redirectURI'],
             'code' =>  $this->fbOauthCode
         );
-        //print $this->config['graphAccessToken']."?".http_build_query($postVars);exit;
-        return $this->doQueryFB($this->config['graphAccessToken'], $postVars);
+        return $this->query($this->config['graphAccessToken'], $postVars);
     }
     
-    private function doQueryFB($fbURL, $postVars, $post=TRUE, $header = null){
+    private function query($fbURL, $postVars, $post=TRUE, $header = null){
         $ch = curl_init(); 
          curl_setopt_array($ch, array(
             CURLOPT_USERAGENT       =>  $this->config['curlUserAgent'],
@@ -371,7 +335,7 @@ class FBookClass {
         $fbResponseArray = curl_getinfo($ch); 
         curl_close ($ch);
         if($fbResponseArray['http_code'] == 0){
-            $this->setError(self::ERROR_COMMUNICATION_FAULT);
+            $this->setError(self::ERROR_COMMUNICATION_FAULT, 'Communication error');
             return false;
         }else if ($fbResponseArray['http_code'] != self::HTTP_STATUS_OK) {
             $this->handleResponse($fbResponse);
@@ -428,8 +392,8 @@ class FBookClass {
     }
     
     public function getOauthAccessToken($isPageQuery = false){
-        $token = (isset($this->fbOauthPageAccessToken)) ? $this->fbOauthPageAccessToken : $this->fbOauthAccessToken;
-        return $token;
+        //$token = (isset($this->fbOauthPageAccessToken)) ? $this->fbOauthPageAccessToken : $this->fbOauthAccessToken;
+        return $this->fbOauthAccessToken;
     }
     
     public function getOauthCode(){
@@ -487,7 +451,7 @@ class FBookClass {
     }
     
     public function setInfo($infomessage){
-        $this->info = $infomessage;
+        $this->info[] = $infomessage;
     }
     
     public function getInfo(){
@@ -504,6 +468,18 @@ class FBookClass {
     
     public function setFBPageId($pageID){
         $this->config['fbPageID'] = $pageID;
+    }
+    
+    public function willPostToPageAsAdmin(){
+        return $this->config['postToPageAsAdmin'];
+    }
+
+    public function setPostToPageAsAdmin($trueOrFalse){
+        if($trueOrFalse === FALSE ){
+            $this->config['postToPageAsAdmin'] = FALSE;
+        }else{
+            $this->config['postToPageAsAdmin'] = TRUE;
+        }
     }
 }
 ?>

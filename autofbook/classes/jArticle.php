@@ -163,13 +163,107 @@ class jArticle {
        return $tagsArray;
     }
     
+    private function joomlaSefUrl($article){
+        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
+        $siteURL = substr(JURI::root(), 0, -1);
+        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
+            // In the back end we need to set the application to the site app instead
+            JFactory::$application = JApplication::getInstance('site');
+        }
+        $articleRoute = JRoute::_( ContentHelperRoute::getArticleRoute($article->id, $article->catid) );
+        $sefURI = str_replace(JURI::base(true), '', $articleRoute);
+        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
+            $siteURL = str_replace($siteURL.DS.'administrator', '', $siteURL);
+            JFactory::$application = JApplication::getInstance('administrator');
+        }
+        $sefURL = $siteURL.$sefURI;
+        //var_dump($sefURI);;exit;
+        return $sefURL;
+    }
+    
+    private function sefURL($article){
+        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
+        $live_site = substr(JURI::root(), 0, -1);
+        
+        $articleAlias = $this->articleAlias($article);
+        $catAlias = $this->categoryAlias($article);
+        //$catSlug = empty($article->catslug) ?  '&catid='.$article->catid.':'.$catAlias : '&catid='.$article->catslug;
+        $articleSlug = empty($article->slug) ?  '&id='.$article->id.':'.$articleAlias : '&id=' . $article->slug;
+        //$baseUrl = str_replace('administrator'.DS, '', JURI::root(true).DS); 
+        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
+            // In the back end we need to set the application to the site app instead
+            JFactory::$application = JApplication::getInstance('site');
+        }
+        $urls = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
+        
+        //$urls =  JRoute::_(ContentHelperRoute::getArticleRoute($article->id, $article->catid));
+        $urls = str_replace(JURI::base(true), '', $urls);
+        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
+            $live_site = str_replace($live_site.DS.'administrator', '', $live_site);
+            JFactory::$application = JApplication::getInstance('administrator');
+        }
+        $urls = $live_site.$urls;
+        JError::raiseNotice('0','url='.$urls);
+        return $urls;
+    }
+    
     public function url($article){
-        $catid = isset($article->catslug) ? '&catid='.$article->catslug : '';
-        $articleID = isset($article->slug) ? '&id=' . $article->slug : '';
-        $url = JRoute::_( 'index.php?view=article' . $catid . $articleID);
-        $parsedRootURL = parse_url(JURI::root());
+        return $this->joomlaSefUrl($article);
+    //jimport( 'joomla.application.router' );
+    //require_once (JPATH_ROOT . DS . 'includes' . DS . 'router.php');
+    //require_once (JPATH_ROOT . DS . 'includes' . DS . 'application.php');
+        
+    
+        $articleAlias = $this->articleAlias($article);
+        $catAlias = $this->categoryAlias($article);
+        $catSlug = empty($article->catslug) ?  '&catid='.$article->catid.':'.$catAlias : '&catid='.$article->catslug;
+        $articleSlug = empty($article->slug) ?  '&id='.$article->id.':'.$articleAlias : '&id=' . $article->slug;
+        JError::raiseNotice('0','aSlug='.$articleSlug);
+        JError::raiseNotice('0','cSlug='.$catSlug);
+        $baseUrl = str_replace('administrator'.DS, '', JURI::root(true).DS); 
+        $url = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
+
+
+
+
+        //$relUrl = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
+        //JError::raiseNotice('0','url='.$url);
+        //JError::raiseNotice('0','rel='.$urls);
+        $parsedRootURL = parse_url($baseUrl);
         $fullUrl = preg_match('/http/', $url)? $url :  $parsedRootURL['scheme'].'://'.$parsedRootURL['host']. $url;
+        JError::raiseNotice('0','url='.$fullUrl);
         return $fullUrl;
+    }
+    
+    private function articleAlias($article){
+        jimport( 'joomla.filter.output' );
+        $alias = $article->alias;
+        if(empty($alias)) {
+            $db =& JFactory::getDBO();
+            $query = 
+                'SELECT a.alias FROM '
+                .$db->nameQuote('#__content').' AS '.$db->nameQuote('a').
+                ' WHERE a.id='.$db->quote($article->id);
+            $db->setQuery($query);
+            $result = $db->loadObject();
+            $alias = empty($result->alias) ? $article->title : $result->alias;
+        }
+        $alias = JFilterOutput::stringURLSafe($alias);
+        return $alias;
+    }
+    
+    private function categoryAlias($article){
+        jimport( 'joomla.filter.output' );
+        $db =& JFactory::getDBO();
+        $query = 
+            'SELECT c.alias FROM '
+            .$db->nameQuote('#__categories').' AS '.$db->nameQuote('c').
+            ' WHERE c.id='.$db->quote($article->catid);
+        $db->setQuery($query);
+        $result = $db->loadObject();
+        $alias = $result->alias;
+        $alias = JFilterOutput::stringURLSafe($alias);
+        return $alias;
     }
     
     public function isPublic($article){

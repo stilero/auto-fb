@@ -114,6 +114,8 @@ class plgSystemAutofbook extends JPlugin {
             )
         );
         $this->preloadClasses();
+        //JError::raiseNotice( 0,'afb-constructor-token1:'.$this->params->def('auth_token') );
+
     }
     
     /**
@@ -126,6 +128,8 @@ class plgSystemAutofbook extends JPlugin {
      * @since 1.6
      */
     public function onContentAfterSave($context, &$article, $isNew) {
+        //$dispatcher =& JDispatcher::getInstance();
+        //$results = $dispatcher->trigger( 'onContentAfterDisplay', array( $context, &$article, &$params ) );
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->inBackend = true;
         $this->prepareToPost($article);
@@ -304,6 +308,7 @@ class plgSystemAutofbook extends JPlugin {
             $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'OAUTHEXCEPT_RESETED'));
             return;
         }else{
+            //JError::raiseNotice( 0,'afb-postarticle-token2:'.$this->CheckClass->fbClass->getOauthAccessToken() );
             $this->displayMessage(JText::_($this->CheckClass->error['message']) , $this->CheckClass->error['type']);
             return;
         }
