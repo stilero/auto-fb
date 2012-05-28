@@ -181,7 +181,7 @@ class jArticle {
         return $sefURL;
     }
     
-    private function sefURL($article){
+    public function seftestURL($article){
         require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
         $live_site = substr(JURI::root(), 0, -1);
         
@@ -207,7 +207,36 @@ class jArticle {
         return $urls;
     }
     
+    public function testSEFURL($article){
+        $urls = JRoute::_( 'index.php?option=com_content&view=article&id='.$this->articleSlug($article).'&catid='.$article->catid);
+        return $urls;
+    }
+    
+    public function testBSefURL($article){
+        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
+        require_once(JPATH_SITE.DS.'libraries'.DS.'joomla'.DS.'application'.DS.'router.php');
+        require_once(JPATH_SITE.DS.'includes'.DS.'router.php');
+        $newUrl = ContentHelperRoute::getArticleRoute($article->id.':'.$this->articleAlias($article), $article->catid);
+        // better will be check if SEF option is enable!
+        $router = new JRouterSite(array('mode'=>JROUTER_MODE_SEF));
+        $newUrl = $router->build($newUrl)->toString(array('path', 'query', 'fragment'));
+        // SEF URL !
+        $newUrl = str_replace('/administrator/', '', $newUrl);
+        //and now the tidying, as Joomlas JRoute makes a cockup of the urls.
+        $newUrl = str_replace('component/content/article/', '', $newUrl);
+        return $newUrl;
+    }
+    
+    private function testCSefURL($article){
+        require_once(JPATH_ADMINISTRATOR.DS.'components'.DS.'com_sh404sef'.DS.'sh404sef.class.php');
+        $joomlaRouter = $app->getRouter();
+        $pageInfo = & Sh404sefFactory::getPageInfo();
+        $pageInfo->router = new Sh404sefClassRouter();
+    }
+
+
     public function url($article){
+        //return $this->testCSefURL($article);
         return $this->joomlaSefUrl($article);
     //jimport( 'joomla.application.router' );
     //require_once (JPATH_ROOT . DS . 'includes' . DS . 'router.php');
@@ -233,6 +262,11 @@ class jArticle {
         $fullUrl = preg_match('/http/', $url)? $url :  $parsedRootURL['scheme'].'://'.$parsedRootURL['host']. $url;
         JError::raiseNotice('0','url='.$fullUrl);
         return $fullUrl;
+    }
+    
+    private function articleSlug($article){
+        $slug = $article->id.':'.$this->articleAlias($article);
+        return $slug;
     }
     
     private function articleAlias($article){

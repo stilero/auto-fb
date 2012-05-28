@@ -2,7 +2,7 @@
 /**
  * A Class for communication with Facebook
  *
- * @version $Id: fbookClass.php 27 2012-05-25 15:49:51Z webbochsant@gmail.com $
+ * @version $Id: fbookClass.php 28 2012-05-26 15:49:51Z webbochsant@gmail.com $
  * @author danieleliasson Stilero AB - http://www.stilero.com
  * @copyright 2011-dec-22 Stilero AB
  * @license GPLv2
@@ -37,6 +37,7 @@ class FBookClass {
     protected $config;
     private $error = false;
     private $info = false;
+    private $debugInfo = false;
     private $notice = false;
     const HTTP_STATUS_OK = '200';
     const ERROR_RETURNURL_NOT_SPECIFIED = '10';
@@ -80,12 +81,27 @@ class FBookClass {
         if(is_array($config)) {
             $this->config = array_merge($this->config, $config);
         }
+        $this->fetchCode();
     } 
+    
+    protected function fetchCode(){
+        if(isset($_GET['code']) && $_GET['state'] == $this->getEncryptedCSFRState()){
+            $code = $this->cleanRequest($_GET['code']);
+            $this->setOauthCode($code);
+        }
+    }
+    
+    public function cleanRequest($request){
+        $cleanedRequest = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $request);
+        $cleanedRequest = ltrim($cleanedRequest, '.');
+        return $cleanedRequest;
+    }
     
     public function postLinkToFB($link, $name=""){
         $this->prepareToken();
         if($this->hasErrorOccured()){
             return;
+            $this->setDebugInfo('error before post link');
         }
         $postvars = array( 
             'access_token'  =>  $this->fbOauthAccessToken,
@@ -95,6 +111,7 @@ class FBookClass {
         );
         $fbPageID = ( $this->config['fbPageID'] == "" )? "" : $this->config['fbPageID']."/";
         $graphURL = $this->config['graphURL'].$fbPageID."feed";
+        $this->setDebugInfo('Posting Link: '.$graphURL.'?'.  http_build_query($postvars));
         $response = $this->query($graphURL, $postvars);
         $this->handleResponse($response);
         return !$this->hasErrorOccured();
@@ -118,16 +135,24 @@ class FBookClass {
         return !$this->hasErrorOccured();
     }
     
-    private function prepareToken(){
+    public function prepareToken(){
         if($this->hasErrorOccured()){
             return;
         }
+        $this->setDebugInfo('Start in prepareToken.');
         $this->authCodeToAuthToken();
-        if($this->hasErrorOccured()) return;
+        if($this->hasErrorOccured()){ 
+            return;
+        }else{
+            $this->fbOauthCode = '';
+        }
+        
         $accesstoken = $this->getOauthAccessToken();
         if( isset($accesstoken) ){
+            $this->setDebugInfo('calling tryGraph from prepareToken.');
             $this->tryGraphQuery();
         }else{
+            $this->setDebugInfo('No token in prepareToken, request Permissions.');
             $this->requestPermissionsForApp();
             return;
         }
@@ -135,9 +160,18 @@ class FBookClass {
             return false;
         }
         if( $this->getErrorCode() == self::ERROR_OAUTH_EXCEPTION ) {
+            $this->setDebugInfo('Oauth exception in prepareToken, request Permissions.');
             $this->resetErrors();
             $response = $this->extendOAuthTokenExpireTime();
-            if($this->hasErrorOccured()) return;
+            $this->setError(self::ERROR_OAUTH_EXCEPTION, 'extendOauthToken');
+            if($this->hasErrorOccured()){
+                $this->setDebugInfo('Failed extending token in prepareToken');
+                $this->requestPermissionsForApp();
+            }
+            if($this->hasErrorOccured()){
+                $this->setDebugInfo('Failed requesting permissions in prepareToken');
+                return;
+            }
             $this->setOauthAccessToken($this->findTokenInResponse($response));
         }
         if( $this->getErrorCode() == self::ERROR_OAUTH_EXCEPTION ) {
@@ -158,6 +192,7 @@ class FBookClass {
     private function fetchPageAdminToken(){
         $userToken = $this->fbOauthAccessToken;
         if($this->getFBPageID() != "" && $this->willPostToPageAsAdmin()===TRUE){
+            $this->setDebugInfo('get a page token in fetchPageAdminToken.');
             $response = $this->requestAdminTokenForPage();
             if($this->hasErrorOccured()) return;
             $pageToken = $this->findPageAdminTokenInJsonResponse($response);
@@ -172,16 +207,18 @@ class FBookClass {
     
     private function authCodeToAuthToken(){
         if(isset($this->fbOauthCode)){
+            $this->setDebugInfo('Inside authCodeToAuthToken');
             $response = $this->requestAccessTokenForApp();
             if( $this->hasErrorOccured() && $this->getErrorMessage() == 'Error validating verification code.'){
                 $this->requestPermissionsForApp();
                 return;
             }  elseif ($this->hasErrorOccured()) {
+                $this->setDebugInfo('failed requestTokenForApp');
                return;
             }
             $this->setOauthAccessToken($this->findTokenInResponse($response));
-            $this->fetchPageAdminToken();
         }
+        $this->setDebugInfo('requestTokenForApp in authCodeToAuthToken. token: '.$this->getOauthAccessToken());
         return $this->getOauthAccessToken();
     }
 
@@ -194,18 +231,14 @@ class FBookClass {
         );
         $tokenURL = $graphURL ."?". http_build_query($postVars);
         $response = $this->query($tokenURL, $postVars, FALSE, $header);
+        $page = $isPageQuery ? ' as page: ' : ': ';
+        $this->setDebugInfo('trying graph query'.$page.$tokenURL);
         return !$this->hasErrorOccured();
     }
     
-    private function findTokenInResponse($response){
-        $match;
-        $regexp = "#^access_token=([^&]+)#i";
-        preg_match_all($regexp, $response, $matches);
-        if(isset ($matches[1][0])){
-            $match = $matches[1][0];
-            return $match;
-        }
-        return FALSE;
+    public function findTokenInResponse($response){
+        parse_str($response, $responses);
+        return isset($responses['access_token']) ? $responses['access_token'] : false;
     }
     
     protected function findPageAdminTokenInJsonResponse($jsonResponse) {
@@ -268,11 +301,12 @@ class FBookClass {
 
     private function extendOAuthTokenExpireTime(){
         $postVars = array(
-            'client_id'     =>  $this->getAppID(),
+            'client_id'     =>  $this->fbAppID,
             'client_secret' =>  $this->fbAppSecret,
             'grant_type'    =>  'fb_exchange_token',
             'fb_exchange_token' =>  $this->fbOauthAccessToken
         );
+        $this->setDebugInfo($this->config['graphAccessToken'].'?'.http_build_query($postVars) );
         return $this->query($this->config['graphAccessToken'], $postVars);
     }
     
@@ -288,20 +322,22 @@ class FBookClass {
     
     public function getOAuthDialogURL(){
         $postVars = array(
-            'client_id'     =>  $this->getAppID(),
+            'client_id'     =>  $this->fbAppID,
             'redirect_uri'    =>  $this->config['redirectURI'],
-            'scope' =>  $this->config['authScope']
+            'scope' =>  $this->config['authScope'],
+            'state' => $this->getEncryptedCSFRState()
         );
         return $tokenURL = $this->config['authTokenURL'] ."?". http_build_query($postVars);
     }
     
     public function requestAccessTokenForApp(){
         $postVars = array(
-            'client_id'     =>  $this->getAppID(),
+            'client_id'     =>  $this->fbAppID,
             'client_secret' =>  $this->fbAppSecret,
             'redirect_uri'    =>  $this->config['redirectURI'],
             'code' =>  $this->fbOauthCode
         );
+        $this->setDebugInfo('requestTokenForApp: '.$this->config['graphAccessToken'].'?'.http_build_query($postVars));
         return $this->query($this->config['graphAccessToken'], $postVars);
     }
     
@@ -446,16 +482,32 @@ class FBookClass {
         return ( isset($this->error['message']) )? $this->error['message'] : false;
     }
     
+    public function getEncryptedCSFRState(){
+        $key = $this->fbAppID;
+        $string = $this->fbAppSecret;
+        $encrypted = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($key), $string, MCRYPT_MODE_CBC, md5(md5($key))));
+        $encrypted = str_replace(array('+','/','='),array('-','_',''),$encrypted);        
+        return $encrypted;
+    }
+    
     public function resetErrors(){
         $this->error = false;
     }
     
+    public function setDebugInfo($infomessage){
+        $this->debugInfo[] = $infomessage;
+    }
+    
     public function setInfo($infomessage){
-        $this->info[] = $infomessage;
+        $this->info = $infomessage;
     }
     
     public function getInfo(){
         return $this->info;
+    }
+    
+    public function getDebugInfo(){
+        return $this->debugInfo;
     }
     
     public function setNotice($message){

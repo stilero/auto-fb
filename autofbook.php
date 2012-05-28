@@ -133,6 +133,9 @@ class plgSystemAutofbook extends JPlugin {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->inBackend = true;
         $this->prepareToPost($article);
+        JError::raiseNotice( 0, $this->CheckClass->articleObject->url );
+        //JError::raiseNotice( 0, $this->CheckClass->articleObject->testSEFURL($article) );
+        //return;
         $this->postArticleToFB();
         return;
     }
@@ -287,7 +290,9 @@ class plgSystemAutofbook extends JPlugin {
             return;
         }
         if ( $this->CheckClass->shareLinkToFB() ) {
+            JError::raiseNotice( 0,'Before OK');
             $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'OK'));
+            JError::raiseNotice( 0,'After OK');
             $token = $this->CheckClass->fbClass->getOauthAccessToken();
             $this->params->set('auth_code', '');
             $this->params->set('auth_token', $token);
@@ -309,6 +314,8 @@ class plgSystemAutofbook extends JPlugin {
             return;
         }else{
             //JError::raiseNotice( 0,'afb-postarticle-token2:'.$this->CheckClass->fbClass->getOauthAccessToken() );
+            JError::raiseNotice( 0,'Error occured');
+            JError::raiseNotice( 0,'error:'.$this->CheckClass->error['message']);
             $this->displayMessage(JText::_($this->CheckClass->error['message']) , $this->CheckClass->error['type']);
             return;
         }

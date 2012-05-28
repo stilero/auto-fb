@@ -73,7 +73,6 @@ class fbControllerClass extends stlShareControllerClass{
         }
         if( $this->fbClass->getInfo() == self::HTTP_STATUS_OK ){
             if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.': all went well, save log to db' );
-            //$this->saveLogToDB();
             return true;
         } else if($this->fbClass->getNotice() != FALSE){
             //if (JDEBUG) JError::raiseNotice( 0, $this->fbClass->getNotice() );
