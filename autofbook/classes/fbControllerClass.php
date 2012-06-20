@@ -56,10 +56,12 @@ class fbControllerClass extends stlShareControllerClass{
     }
     
     public function shareLinkToFB() {
+        
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         if( $this->error != FALSE) {
             return false;
         }
+
         if($this->config['fbOauthAccessToken']!='' || $this->config['fbOauthCode'] != '' ){
             $this->saveLogToDB();
         }

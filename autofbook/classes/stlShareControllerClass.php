@@ -180,19 +180,25 @@ class stlShareControllerClass {
         }
         $delayInMinutes = ( !is_numeric($this->config['shareDelay']) || $this->config['shareDelay'] < 2 )?3:$this->config['shareDelay'];
         $currentDate=date("Y-m-d H:i:s");
-        $query;
-        $db		= JFactory::getDbo();
-        if( $this->isJoomla16() || $this->isJoomla17() ) {
-            $query	= $db->getQuery(true);
-            $query->select('id');
-            $query->from( $this->config['shareLogTableName'] );
-            $query->where("date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')");
-        }  elseif($this->isJoomla15()) {
-            $query = "SELECT "
-                .$db->nameQuote('id').
-                " FROM ".$db->nameQuote( $this->config['shareLogTableName'] ).
-                " WHERE date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
-        }
+        $db = JFactory::getDbo();
+        $dbColumn = $db->nameQuote('id');
+        $table = $db->nameQuote($this->config['shareLogTableName']);
+        $key = $db->nameQuote('date');
+//        
+//        if( $this->isJoomla16() || $this->isJoomla17() ) {
+//            $query	= $db->getQuery(true);
+//            $query->select('id');
+//            $query->from( $this->config['shareLogTableName'] );
+//            $query->where("date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')");
+//        }  elseif($this->isJoomla15()) {
+//            $query = "SELECT "
+//                .$db->nameQuote('id').
+//                " FROM ".$db->nameQuote( $this->config['shareLogTableName'] ).
+//                " WHERE date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
+//        }
+        $query = "SELECT ".$dbColumn.
+                " FROM ".$table.
+                " WHERE ".$key." > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
         $db->setQuery($query);
         $postMadeWithinDelayTime = $db->loadObject();
         if($postMadeWithinDelayTime){
@@ -208,20 +214,27 @@ class stlShareControllerClass {
         if($this->error != FALSE ){
             return FALSE;
         }
-        $query;
-        $db		= JFactory::getDbo();
+        $db = JFactory::getDbo();
+        $column = $db->nameQuote('id');
+        $table = $db->nameQuote($this->config['shareLogTableName']);
+        $key = $db->nameQuote('article_id');
         $articleID = $this->articleObject->id;
-        if($this->isJoomla16() || $this->isJoomla17()) {
-            $query	= $db->getQuery(true);
-            $query->select('id');
-            $query->from( $this->config['shareLogTableName'] );
-            $query->where('article_id=' . $db->Quote($articleID));
-        }  elseif($this->isJoomla15() ) {
-            $query = 'SELECT '
-            .$db->nameQuote('id').
-                ' FROM '.$db->nameQuote( $this->config['shareLogTableName'] ).
-                ' WHERE '.$db->nameQuote('article_id').'='.$db->Quote($articleID);
-        }
+        $val = $db->Quote($articleID);
+        
+//        if($this->isJoomla16() || $this->isJoomla17()) {
+//            $query	= $db->getQuery(true);
+//            $query->select('id');
+//            $query->from( $this->config['shareLogTableName'] );
+//            $query->where('article_id=' . $db->Quote($articleID));
+//        }  elseif($this->isJoomla15() ) {
+//            $query = 'SELECT '
+//            .$db->nameQuote('id').
+//                ' FROM '.$db->nameQuote( $this->config['shareLogTableName'] ).
+//                ' WHERE '.$db->nameQuote('article_id').'='.$db->Quote($articleID);
+//        }
+        $query = 'SELECT '.$column.
+                ' FROM '.$table.
+                ' WHERE '.$key.'='.$val;
         $db->setQuery($query);
         $itemAlreadyPosted = $db->loadObject();
         if($itemAlreadyPosted){

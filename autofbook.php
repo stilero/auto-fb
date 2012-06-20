@@ -211,35 +211,35 @@ class plgSystemAutofbook extends JPlugin {
         return;
     }
     
-//    function onAfterDispatch( ){
-//        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-//        $actualSignature = JRequest::getVar('signature');
-//        $code = JRequest::getVar('code');
-//        if( ($code == '') || ($actualSignature == '') ){
-//            return;
-//        }
-//        if(!is_object($this->CheckClass)){
-//                $this->setupClasses();
-//        }
-//        $expectedSignature = rawurldecode($this->CheckClass->getRequestSignature());
-//        if( $actualSignature != $expectedSignature){
-//            JError::raiseNotice( 0,'The signature sent to Facebook differs from the one received.' );
-//             if (JDEBUG) JError::raiseNotice( 0,'Expected: '.$expectedSignature );
-//             if (JDEBUG) JError::raiseNotice( 0,'Actual: '.$actualSignature );   
-//            return;
-//        }
-//        if($code != '' ){
-//            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." code: ".$code );
-//            $this->params->set('auth_code', $code.'#_=_');
-//            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." param: ".$this->params->toString() );
-//            if(!is_object($this->CheckClass)){
-//                $this->setupClasses();
-//            }
-//            $this->CheckClass->storeParams($this->params, $this->config['pluginElement']);
-//            $this->inBackend = true;
-//            $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'AUTHORIZED'), 'notice');
-//        }
-//    }
+    function onAfterDispatch( ){
+        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
+        $actualSignature = JRequest::getVar('signature');
+        $code = JRequest::getVar('code');
+        if( ($code == '') || ($actualSignature == '') ){
+            return;
+        }
+        if(!is_object($this->CheckClass)){
+                $this->setupClasses();
+        }
+        $expectedSignature = rawurldecode($this->CheckClass->getRequestSignature());
+        if( $actualSignature != $expectedSignature){
+            JError::raiseNotice( 0,'The signature sent to Facebook differs from the one received.' );
+             if (JDEBUG) JError::raiseNotice( 0,'Expected: '.$expectedSignature );
+             if (JDEBUG) JError::raiseNotice( 0,'Actual: '.$actualSignature );   
+            return;
+        }
+        if($code != '' ){
+            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." code: ".$code );
+            $this->params->set('auth_code', $code.'#_=_');
+            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." param: ".$this->params->toString() );
+            if(!is_object($this->CheckClass)){
+                $this->setupClasses();
+            }
+            $this->CheckClass->storeParams($this->params, $this->config['pluginElement']);
+            $this->inBackend = true;
+            $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'AUTHORIZED'), 'notice');
+        }
+    }
     
     private function prepareToPost($article){
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
@@ -289,10 +289,12 @@ class plgSystemAutofbook extends JPlugin {
             $this->displayMessage(JText::_($this->CheckClass->error['message']) , $this->CheckClass->error['type']);
             return;
         }
+        
         if ( $this->CheckClass->shareLinkToFB() ) {
-            JError::raiseNotice( 0,'Before OK');
+            
+            //JError::raiseNotice( 0,'Before OK');
             $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'OK'));
-            JError::raiseNotice( 0,'After OK');
+            //JError::raiseNotice( 0,'After OK');
             $token = $this->CheckClass->fbClass->getOauthAccessToken();
             $this->params->set('auth_code', '');
             $this->params->set('auth_token', $token);
@@ -327,7 +329,6 @@ class plgSystemAutofbook extends JPlugin {
         $this->CheckClass->isServerSafeModeDisabled();
         $this->CheckClass->isFBAppDetailsEntered();
         $this->CheckClass->isArticleObjectIncluded();
-        //$this->CheckClass->isItemActive();
         $this->CheckClass->isItemPublished();
         $this->CheckClass->isItemNewEnough();
         $this->CheckClass->isItemPublic();
@@ -463,7 +464,8 @@ class plgSystemAutofbook extends JPlugin {
             $this->showWarning($msg);
             return;
         }
-        JFactory::getApplication()->enqueueMessage( $msg, $messageType);
+        $app = &JFactory::getApplication();
+        $app->enqueueMessage( $msg, $messageType);
     }
     
     public function showNotice($msg, $errorCode=0) {
