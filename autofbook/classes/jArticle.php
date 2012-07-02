@@ -3,7 +3,7 @@
 /**
  * A factory class for making standard object from Joomla articles.
  * 
- * $Id: jArticle.php 14 2012-05-03 09:13:02Z webbochsant@gmail.com $
+ * $Id: jArticle.php 15 2012-07-02 07:12:44Z webbochsant@gmail.com $
  * @author Daniel Eliasson <joomla at stilero.com>
  * @license	GPLv3
  * 
@@ -81,7 +81,6 @@ class jArticle {
     
     public function imagesInContent($article){
         $content = $article->text;
-        //var_dump($content);exit;
         if( ($content == '') || (!class_exists('DOMDocument')) ){
             return;
         }
@@ -139,15 +138,16 @@ class jArticle {
     }
     
     public function description($article){
+        $descText = $article->text!="" ? $article->text : '';
         $description = $article->text!="" ? $article->text : '';
         if(isset($article->introtext) && $article->introtext!=""){
-            $description = $article->introtext;
+            $descText = $article->introtext;
         }elseif (isset($article->metadesc) && $article->metadesc!="" ) {
-            $description = $article->metadesc;
+            $descText = $article->metadesc;
         }
         $descNeedles = array("\n", "\r", "\"", "'");
         str_replace($descNeedles, " ", $description );
-        $description = substr(htmlentities(strip_tags($description)), 0, 250);
+        $description = substr(htmlspecialchars( strip_tags($descText), ENT_COMPAT, 'UTF-8'), 0, 250);
         return $description;
     }
     
@@ -161,34 +161,15 @@ class jArticle {
            $tagsArray[] = trim(str_replace(" ", "", $value));
        }
        return $tagsArray;
-    }
+    } 
     
-    private function joomlaSefUrl($article){
+    private function _joomlaSefUrlFromRoute($article){
         require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
         $siteURL = substr(JURI::root(), 0, -1);
         if(JPATH_BASE == JPATH_ADMINISTRATOR) {
             // In the back end we need to set the application to the site app instead
             JFactory::$application = JApplication::getInstance('site');
         }
-        $articleRoute = JRoute::_( ContentHelperRoute::getArticleRoute($article->id, $article->catid) );
-        $sefURI = str_replace(JURI::base(true), '', $articleRoute);
-        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
-            $siteURL = str_replace($siteURL.DS.'administrator', '', $siteURL);
-            JFactory::$application = JApplication::getInstance('administrator');
-        }
-        $sefURL = $siteURL.$sefURI;
-        //var_dump($sefURI);;exit;
-        return $sefURL;
-    }
-    
-    private function joomlaSefUrlFromRoute($article){
-        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
-        $siteURL = substr(JURI::root(), 0, -1);
-        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
-            // In the back end we need to set the application to the site app instead
-            JFactory::$application = JApplication::getInstance('site');
-        }
-        //$articleAlias = $this->articleAlias($article);
         $catAlias = $this->categoryAlias($article);
         $articleSlug = $this->articleSlug($article);
         $catSlug = $article->catid.':'.$catAlias;
@@ -226,88 +207,9 @@ class jArticle {
         $joomlaRouter->attachParseRule( array( $pageInfo->router, 'parseRule'));
         $joomlaRouter->attachBuildRule( array( $pageInfo->router, 'buildRule'));
     }
-    
-    public function seftestURL($article){
-        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
-        $live_site = substr(JURI::root(), 0, -1);
-        
-        $articleAlias = $this->articleAlias($article);
-        $catAlias = $this->categoryAlias($article);
-        //$catSlug = empty($article->catslug) ?  '&catid='.$article->catid.':'.$catAlias : '&catid='.$article->catslug;
-        $articleSlug = empty($article->slug) ?  '&id='.$article->id.':'.$articleAlias : '&id=' . $article->slug;
-        //$baseUrl = str_replace('administrator'.DS, '', JURI::root(true).DS); 
-        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
-            // In the back end we need to set the application to the site app instead
-            JFactory::$application = JApplication::getInstance('site');
-        }
-        $urls = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
-        
-        //$urls =  JRoute::_(ContentHelperRoute::getArticleRoute($article->id, $article->catid));
-        $urls = str_replace(JURI::base(true), '', $urls);
-        if(JPATH_BASE == JPATH_ADMINISTRATOR) {
-            $live_site = str_replace($live_site.DS.'administrator', '', $live_site);
-            JFactory::$application = JApplication::getInstance('administrator');
-        }
-        $urls = $live_site.$urls;
-        JError::raiseNotice('0','url='.$urls);
-        return $urls;
-    }
-    
-    public function testSEFURL($article){
-        $urls = JRoute::_( 'index.php?option=com_content&view=article&id='.$this->articleSlug($article).'&catid='.$article->catid);
-        return $urls;
-    }
-    
-    public function testBSefURL($article){
-        require_once(JPATH_SITE.DS.'components'.DS.'com_content'.DS.'helpers'.DS.'route.php');
-        require_once(JPATH_SITE.DS.'libraries'.DS.'joomla'.DS.'application'.DS.'router.php');
-        require_once(JPATH_SITE.DS.'includes'.DS.'router.php');
-        $newUrl = ContentHelperRoute::getArticleRoute($article->id.':'.$this->articleAlias($article), $article->catid);
-        // better will be check if SEF option is enable!
-        $router = new JRouterSite(array('mode'=>JROUTER_MODE_SEF));
-        $newUrl = $router->build($newUrl)->toString(array('path', 'query', 'fragment'));
-        // SEF URL !
-        $newUrl = str_replace('/administrator/', '', $newUrl);
-        //and now the tidying, as Joomlas JRoute makes a cockup of the urls.
-        $newUrl = str_replace('component/content/article/', '', $newUrl);
-        return $newUrl;
-    }
-    
-    private function testCSefURL($article){
-        require_once(JPATH_ADMINISTRATOR.DS.'components'.DS.'com_sh404sef'.DS.'sh404sef.class.php');
-        $joomlaRouter = $app->getRouter();
-        $pageInfo = & Sh404sefFactory::getPageInfo();
-        $pageInfo->router = new Sh404sefClassRouter();
-    }
-
-
+   
     public function url($article){
-        //return $this->testCSefURL($article);
-        return $this->joomlaSefUrlFromRoute($article);
-    //jimport( 'joomla.application.router' );
-    //require_once (JPATH_ROOT . DS . 'includes' . DS . 'router.php');
-    //require_once (JPATH_ROOT . DS . 'includes' . DS . 'application.php');
-        
-    
-        $articleAlias = $this->articleAlias($article);
-        $catAlias = $this->categoryAlias($article);
-        $catSlug = empty($article->catslug) ?  '&catid='.$article->catid.':'.$catAlias : '&catid='.$article->catslug;
-        $articleSlug = empty($article->slug) ?  '&id='.$article->id.':'.$articleAlias : '&id=' . $article->slug;
-        JError::raiseNotice('0','aSlug='.$articleSlug);
-        JError::raiseNotice('0','cSlug='.$catSlug);
-        $baseUrl = str_replace('administrator'.DS, '', JURI::root(true).DS); 
-        $url = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
-
-
-
-
-        //$relUrl = JRoute::_( 'index.php?view=article' . $catSlug . $articleSlug);
-        //JError::raiseNotice('0','url='.$url);
-        //JError::raiseNotice('0','rel='.$urls);
-        $parsedRootURL = parse_url($baseUrl);
-        $fullUrl = preg_match('/http/', $url)? $url :  $parsedRootURL['scheme'].'://'.$parsedRootURL['host']. $url;
-        JError::raiseNotice('0','url='.$fullUrl);
-        return $fullUrl;
+        return $this->_joomlaSefUrlFromRoute($article);
     }
     
     private function articleSlug($article){
