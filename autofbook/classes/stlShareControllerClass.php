@@ -178,7 +178,8 @@ class stlShareControllerClass {
         if($this->error != FALSE ){
             return FALSE;
         }
-        $delayInMinutes = ( !is_numeric($this->config['shareDelay']) || $this->config['shareDelay'] < 2 )?3:$this->config['shareDelay'];
+        $delayInMinutes = ( !is_numeric($this->config['shareDelay']) || $this->config['shareDelay'] < 0 )?1:$this->config['shareDelay'];
+        $delayInMinutes = ( $delayInMinutes > 60 )?60:$delayInMinutes;
         $currentDate=date("Y-m-d H:i:s");
         $db = JFactory::getDbo();
         $dbColumn = $db->nameQuote('id');

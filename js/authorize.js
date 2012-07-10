@@ -11,24 +11,25 @@ window.addEvent('domready', function(){
             '?client_id=' + appID +
             '&redirect_uri=' + redirectURI +
             '&scope=publish_stream,share_item,offline_access,manage_pages';
-            $( authorizeElement).href = link;
+            $(authorizeElement).href = link;
         if($(accessTokenElement).value == ''){
-            $( authorizeElement).set('class', 'fbconnect');
-            $( authorizeElement).text = 'Connect to FB';
+            $(authorizeElement).innerHTML = 'Connect to FB';
+            $(authorizeElement).set('class', 'fbconnect');
         }else{
-            $( authorizeElement).set('class', 'fbdisconnect');
-            $( authorizeElement).text = 'Remove FB Connection';
+            $(authorizeElement).innerHTML = 'Remove FB Connection';
+            $(authorizeElement).set('class', 'fbdisconnect');
         }
     };
     var clearAuthorization = function(){
         $(authCodeElement).value = '';
         $(fbPageIdElement).value = '';
         $(accessTokenElement).value = '';
+        $(authorizeElement).innerHTML = 'Connect to FB';
         setButtonHref();
         $(accessTokenElement).fireEvent('change');
     };
     
-    $( authorizeElement).addEvent('click', function(e){
+    $(authorizeElement).addEvent('click', function(e){
         if($(accessTokenElement).value != ''){
             e.preventDefault();
             clearAuthorization();

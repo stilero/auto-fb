@@ -103,8 +103,9 @@ class FBookClass {
             return;
             $this->setDebugInfo('error before post link');
         }
+        $isPageQuery = ($this->config['fbPageID'] != "") ? TRUE : FALSE;
         $postvars = array( 
-            'access_token'  =>  $this->fbOauthAccessToken,
+            'access_token'  =>  $this->getOauthAccessToken($isPageQuery),
             'method'        =>  'post',
             'link'          =>  $link,
             'name'          =>  $name
@@ -196,7 +197,7 @@ class FBookClass {
             $response = $this->requestAdminTokenForPage();
             if($this->hasErrorOccured()) return;
             $pageToken = $this->findPageAdminTokenInJsonResponse($response);
-            $this->setOauthAccessToken($pageToken);
+            $this->setOauthAccessToken($pageToken, TRUE);
         }
         if(!$this->tryGraphQuery(true)){
             $this->setOauthAccessToken($userToken);
@@ -223,9 +224,9 @@ class FBookClass {
     }
 
     private function tryGraphQuery($isPageQuery=false){
+        $token = $this->getOauthAccessToken($isPageQuery);
         $header = $this->buildHTTPHeader();
         $graphURL = $this->config['graphFeedURL'];
-        $token = $this->getOauthAccessToken($isPageQuery);
         $postVars = array(
             'access_token' =>  $token,
         );
@@ -423,13 +424,22 @@ class FBookClass {
         if($token ==''){
             return;
         }
-        $this->fbOauthAccessToken = $token;
+        if($isPageQuery){
+            $this->fbOauthPageAccessToken = $token;
+        }else{
+            $this->fbOauthAccessToken = $token;
+        }
+        
         
     }
     
     public function getOauthAccessToken($isPageQuery = false){
         //$token = (isset($this->fbOauthPageAccessToken)) ? $this->fbOauthPageAccessToken : $this->fbOauthAccessToken;
-        return $this->fbOauthAccessToken;
+        if($isPageQuery){
+            return $this->fbOauthPageAccessToken;
+        }else{
+            return $this->fbOauthAccessToken;
+        }
     }
     
     public function getOauthCode(){
