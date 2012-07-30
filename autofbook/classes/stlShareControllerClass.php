@@ -142,20 +142,31 @@ class stlShareControllerClass {
         if($this->error != FALSE ){
             return FALSE;
         }
+        if(JRequest::getVar('option') == 'com_virtuemart'){
+            if (JDEBUG) JError::raiseNotice( 0,'* '.__CLASS__."->".__FUNCTION__.' returning, VM' );
+            return true;
+        }
+        $isK2 = JRequest::getVar('option') == 'com_k2' ? true : false;
         $include = false;
         $exclude = false;
-        if('inclOrExcl' == 0){
+        if($this->config['inclOrExcl'] == 0){
             $include = true;
         }else{
             $exclude = true;
         }
-        
-        if ( $this->config['categoriesToShare'] == "" ){
-            return TRUE;
+        if($isK2){
+            if ( $this->config['k2CategoriesToShare'] == "" || $this->config['k2CategoriesToShare'][0]=="" ){
+                if (JDEBUG) JError::raiseNotice( 0,'* '.__CLASS__."->".__FUNCTION__.'->K2 cats empty' );
+                return TRUE;
+            }
+        }else{
+            if ( $this->config['categoriesToShare'] == "" || $this->config['categoriesToShare'][0]=="" ){
+                if (JDEBUG) JError::raiseNotice( 0,'* '.__CLASS__."->".__FUNCTION__.'->Joomla cats empty' );
+                return TRUE;
+            }
         }
-        //$categories = explode(",", $this->config['categoriesToShare']);
-        $categories = $this->config['categoriesToShare'];
-        //$categoriesCount = count($categories);
+        
+        $categories = $isK2 ? $this->config['k2CategoriesToShare'] : $this->config['categoriesToShare'];
         $itemCategID = $this->articleObject->catid;
         if($include){
             if ( !in_array( $itemCategID, $categories ) ){
@@ -218,24 +229,16 @@ class stlShareControllerClass {
         $db = JFactory::getDbo();
         $column = $db->nameQuote('id');
         $table = $db->nameQuote($this->config['shareLogTableName']);
-        $key = $db->nameQuote('article_id');
+        $keyArticleID = $db->nameQuote('article_id');
         $articleID = $this->articleObject->id;
-        $val = $db->Quote($articleID);
-        
-//        if($this->isJoomla16() || $this->isJoomla17()) {
-//            $query	= $db->getQuery(true);
-//            $query->select('id');
-//            $query->from( $this->config['shareLogTableName'] );
-//            $query->where('article_id=' . $db->Quote($articleID));
-//        }  elseif($this->isJoomla15() ) {
-//            $query = 'SELECT '
-//            .$db->nameQuote('id').
-//                ' FROM '.$db->nameQuote( $this->config['shareLogTableName'] ).
-//                ' WHERE '.$db->nameQuote('article_id').'='.$db->Quote($articleID);
-//        }
+        $valArticleID = $db->Quote($articleID);
+        $keyOption = $db->nameQuote('articlelink');
+        $valOption = $db->Quote(JRequest::getVar('option'));
+
         $query = 'SELECT '.$column.
                 ' FROM '.$table.
-                ' WHERE '.$key.'='.$val;
+                ' WHERE '.$keyArticleID.'='.$valArticleID.
+                ' AND '.$keyOption.' = '.$valOption;
         $db->setQuery($query);
         $itemAlreadyPosted = $db->loadObject();
         if($itemAlreadyPosted){
@@ -297,30 +300,53 @@ class stlShareControllerClass {
  
     public function saveLogToDB() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $itemID = $this->articleObject->id;
-        $itemCategID = $this->articleObject->catid;
-        $itemLink = $this->articleObject->link;
-        $itemLanguage = $this->articleObject->language;
-        $date=&JFactory::getDate();
-        $data =new stdClass();
-        $data->id = null;
-        $data->article_id = $itemID;
-        $data->cat_id = $itemCategID;
-        $data->articlelink = $itemLink;
-        $data->date = date("Y-m-d H:i:s");
-        $data->language = $itemLanguage;
-        $db = &JFactory::getDbo();
-        $db->insertObject( $this->config['shareLogTableName'] , $data, 'id');
-        return;
+        $db = JFactory::getDbo();
+        $table = $db->nameQuote($this->config['shareLogTableName']);
+        $keyID = $db->nameQuote('id');
+        $keyArticleID = $db->nameQuote('article_id');
+        $keyCatID = $db->nameQuote('cat_id');
+        $keyOption = $db->nameQuote('articlelink');
+        $keyDate = $db->nameQuote('date');
+        $keyLang = $db->nameQuote('language');
+        $valArticleID = $db->quote($this->articleObject->id);
+        $valCatID = $db->quote($this->articleObject->catid);
+        $valOption = $db->quote(JRequest::getVar('option'));
+        $valDate = $db->quote(date("Y-m-d H:i:s"));
+        $valLang = $db->quote($this->articleObject->language);
+        $query = 'INSERT INTO '.$table.' ('.
+                ' '.$keyID.','.
+                ' '.$keyArticleID.','.
+                ' '.$keyCatID.','.
+                ' '.$keyOption.','.
+                ' '.$keyDate.','.
+                ' '.$keyLang.
+                ') VALUES ('.
+                ' NULL,'.
+                ' '.$valArticleID.','.
+                ' '.$valCatID.','.
+                ' '.$valOption.','.
+                ' '.$valDate.','.
+                ' '.$valLang.
+                ')';
+        $db->setQuery($query);
+        return $result = $db->query($query);
     }
     
     public function deleteLogFromDB() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $db = &JFactory::getDbo();
-        $itemID = $this->articleObject->id;
+        $db = JFactory::getDbo();
+        $table = $db->nameQuote($this->config['shareLogTableName']);
+        $keyArticleID = $db->nameQuote('article_id');
+        $articleID = $this->articleObject->id;
+        $valArticleID = $db->Quote($articleID);
+        $keyOption = $db->nameQuote('articlelink');
+        $valOption = $db->Quote(JRequest::getVar('option'));
+
         $query = 'DELETE '.
-            ' FROM '.$db->nameQuote($this->config['shareLogTableName']).
-            ' WHERE '.$db->nameQuote('article_id').'='.$itemID;
+                ' FROM '.$table.
+                ' WHERE '.$keyArticleID.'='.$valArticleID.
+                ' AND '.$keyOption.' = '.$valOption;
+        
         $db->setQuery($query);
         return $result = $db->query($query);
     }

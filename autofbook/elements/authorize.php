@@ -39,43 +39,45 @@ class fbauthorize{
     var $jsPath = self::$assetsPath.DS.'js';*/
     
     static function assetsPath(){
-        $assetsPath = JURI::root(true).DS.'media'.DS.'plg_autofbook'.DS;
+        $assetsPath = JURI::root(true).'/media/plg_autofbook/';
         return $assetsPath;
     }
     
     static function imgPath(){
-        $imgPath = self::assetsPath().'images'.DS;
+        $imgPath = self::assetsPath().'images/';
         return $imgPath;
     }
     
     static function jsPath(){
-        $imgPath = self::assetsPath().'js'.DS;
+        $imgPath = self::assetsPath().'js/';
         return $imgPath;
     }
     
-    static function addJsGeneral(){
+    static function addJsGeneral($isJ15 = FALSE){
         $document =& JFactory::getDocument();
-        $document->addScript(self::jsPath().'authorize.js');
+        if(!$isJ15){
+            $document->addScript(self::jsPath().'authorize.js');
+        }else{
+            $document->addScript(self::jsPath().'authorize15.js');
+        }
     }
     
     static function addJs15(){
-        $catcherURI = JURI::root().'plugins'.DS.'system'.DS.'autofbook'.DS.'helpers'.DS.'catcherJ15.php';
-        $helpersURI = JURI::root().'plugins'.DS.'system'.DS.'autofbook'.DS.'helpers'.DS;
+        $catcherURI = JURI::root().'plugins/system/autofbook/helpers/catcherJ15.php';
+        $helpersURI = JURI::root().'plugins/system/autofbook/helpers/';
 $jsVars = <<<EOD
     var helpersURI = '$helpersURI';
     var catcherURI = '$catcherURI';
 EOD;
     $document =& JFactory::getDocument();
     $document->addScriptDeclaration($jsVars);
-    $document->addScript('https://ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js');
+    //$document->addScript('https://ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js');
     $document->addScript(self::jsPath().'j15Elements.js');
 }
 
     static function addJs16(){
-        $catcherURI = JURI::root().'plugins'.DS.'system'.DS.'autofbook'.DS.'autofbook'.DS.'helpers'.DS.'catcherJ16.php';
-        //$catcherURI = urlencode($catcherURI);
-        $helpersURI = JURI::root().'plugins'.DS.'system'.DS.'autofbook'.DS.'autofbook'.DS.'helpers'.DS;
-        //$helpersURI = urlencode($helpersURI);
+        $catcherURI = JURI::root().'plugins/system/autofbook/autofbook/helpers/catcherJ16.php';
+        $helpersURI = JURI::root().'plugins/system/autofbook/autofbook/helpers/';
         
 $jsVars = <<<EOD
     var helpersURI = '$helpersURI';
@@ -86,10 +88,9 @@ EOD;
     $document->addScript(self::jsPath().'j16Elements.js');
 }
 
-    static function connectButton($id){
+    static function connectButton($id, $isJ15=FALSE){
         $buttonImage = self::imgPath().'connect-button.png';
         $htmlCode = 
-            '<span class="readonly">'.
             '<a '.
             'id="'.$id.'" '.
             'class="fbconnect" '.
@@ -98,8 +99,10 @@ EOD;
             'target="_blank" >'.
             //'<img src="'.$buttonImage.'" />'.
             'Connect to FB'.
-            '</a>'.
-            '</span>';
+            '</a>';
+        if(!$isJ15){
+            $htmlCode = '<span class="readonly">'.$htmlCode.'</span>';
+        }
         return $htmlCode;
     }
     
@@ -120,9 +123,20 @@ if(version_compare(JVERSION, '1.6.0', '<')){
 
         function fetchElement($name, $value, &$node, $control_name){
             fbauthorize::addJs15();
-            fbauthorize::addJsGeneral();
+            fbauthorize::addJsGeneral(TRUE);
             fbauthorize::addTranslationJS();
-            return fbauthorize::connectButton($control_name.$name);
+            return fbauthorize::connectButton($control_name.$name, TRUE);
+        }
+        
+        function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
+            $output = '<label id="'.$control_name.$name.'-lbl" for="'.$control_name.$name.'"';
+            if ($description) {
+                    $output .= ' class="hasTip" title="'.JText::_($label).'::'.JText::_($description).'">';
+            } else {
+                    $output .= '>';
+            }
+            $output .= JText::_( $label ).'</label>';
+            return $output;    
         }
     }//End Class J1.5
 }else{

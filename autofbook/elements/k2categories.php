@@ -4,7 +4,7 @@
 *
 * @version  1.0
 * @author Daniel Eliasson - joomla at stilero.com
-* @copyright  (C) 2012-jul-28 Stilero Webdesign http://www.stilero.com
+* @copyright  (C) 2012-jul-29 Stilero Webdesign http://www.stilero.com
 * @category Custom Form field
 * @license    GPLv2
 *
@@ -13,7 +13,7 @@
 * is derivative of works licensed under the GNU General Public License or
 * other free or open source software licenses.
 *
-* This file is part of categories.
+* This file is part of k2categories.
 *
 * AutoFBook4 is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -32,67 +32,61 @@
  
 // no direct access
 defined('_JEXEC') or die('Restricted access');
-class Categories{
+class k2categories{
     static function getCategories(){
         $db =& JFactory::getDBO();
         $query =
-            'SELECT '.$db->nameQuote('id').', '.$db->nameQuote('title').
-                ' FROM '.$db->nameQuote('#__categories').
-                ' WHERE '.$db->nameQuote('extension').'='.$db->quote('com_content').
-                ' AND published = 1 ORDER BY '.$db->nameQuote('title').' ASC';
-        $db->setQuery($query);    
-        $result = $db->loadAssocList();
-        return $result;
-    }
-    
-    static function getJ15Categories(){
-        $db =& JFactory::getDBO();
-        $query =
-            'SELECT '.$db->nameQuote('id').', '.$db->nameQuote('title').
-                ' FROM '.$db->nameQuote('#__categories').
-                ' WHERE '.$db->nameQuote('published').' = 1 ORDER BY '.$db->nameQuote('title').' ASC';
+            'SELECT '.$db->nameQuote('id').', '.$db->nameQuote('name').
+                ' FROM '.$db->nameQuote('#__k2_categories').
+                ' WHERE '.$db->nameQuote('published').'='.$db->quote('1').
+                ' ORDER BY '.$db->nameQuote('name').' ASC';
         $db->setQuery($query);    
         $result = $db->loadAssocList();
         return $result;
     }
     
     static function selectList($id, $name, $selectedIDs, $isJ15=FALSE){
+        $cats = $isJ15 ? self::getJ15Categories() : self::getCategories();
+        if(!$cats){
+            return '';
+        }
         $htmlCode = '<select id="'.$id.'" name="'.$name.'[]" class="inputbox" multiple="multiple" size="10">';
         $defaultOption = array(
             array(
                 'id' => '', 
-                'title' => 'none')
+                'name' => 'none')
             );
-        $cats = $isJ15 ? self::getJ15Categories() : self::getCategories();
         $categories = array_merge($defaultOption, $cats);
         foreach ($categories as $category) {
             $selected = '';
             if(isset($selectedIDs) && $selectedIDs !=""){
                 $selected = in_array($category['id'], $selectedIDs) ? ' selected="selected"': '';
             }
-            $options.='<option value="'.$category['id'].'"'.$selected.'>'.$category['title'].'</option>'; 
+            $options.='<option value="'.$category['id'].'"'.$selected.'>'.$category['name'].'</option>'; 
         }
         $htmlCode .= $options;
         $htmlCode .= '</select>';      
         return $htmlCode;
     }
-    
 }
 if(version_compare(JVERSION, '1.6.0', '<')){
     /**
     * @since J1.5
     */
-    class JElementCategories extends JElement{
+    class JElementK2categories extends JElement{
         private $config;
 
         function fetchElement($name, $value, &$node, $control_name){
-            $rawParams = $this->_parent->_raw;
-            $params = explode("\n", $rawParams);
-            $sectIDParams = explode('=', $params[0]);
-            $sectIDs = explode('|',$sectIDParams[1]);
-            return Categories::selectList($control_name.$name, $control_name.'['.$name.']', $sectIDs, true);
-            $htmlCode = '<textarea  id="' . $control_name.$name . '" name="' . $control_name.'['.$name.']' . '" value="' . $value . '" rows="5" cols="30" ></textarea>';
-            return $htmlCode;
+            $data = null;
+            foreach ((Array)$this->form as $key => $val) {
+                if($val instanceof JRegistry){
+                $data = &$val;
+                break;
+                }
+            }
+            $data = $data->toArray();
+            $selectedOptions = $data['params']['k2cats'];
+            return k2categories::selectList($this->id, $this->name, $selectedOptions);
         }
         function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
             $output = '<label id="'.$control_name.$name.'-lbl" for="'.$control_name.$name.'"';
@@ -102,6 +96,7 @@ if(version_compare(JVERSION, '1.6.0', '<')){
                     $output .= '>';
             }
             $output .= JText::_( $label ).'</label>';
+
             return $output;        
         }
     }//End Class J1.5
@@ -109,8 +104,8 @@ if(version_compare(JVERSION, '1.6.0', '<')){
     /**
     * @since J1.6
     */
-    class JFormFieldCategories extends JFormField {
-        protected $type = 'categories';
+    class JFormFieldK2categories extends JFormField {
+        protected $type = 'k2categories';
         private $config;
 
         protected function getInput(){
@@ -122,35 +117,8 @@ if(version_compare(JVERSION, '1.6.0', '<')){
                 }
             }
             $data = $data->toArray();
-            $selectedOptions = $data['params']['section_id'];
-            return Categories::selectList($this->id, $this->name, $selectedOptions);
-            $htmlCode = '<select id="'.$this->id.'" name="'.$this->name.'[]" class="inputbox" multiple="multiple">';
-            $defaultOption = array(
-                array(
-                    'id' => '', 
-                    'title' => 'none')
-                );
-            $categories = array_merge($defaultOption, Categories::getCategories());
-            $selected = $this->params;
-            $data = null;
-            foreach ((Array)$this->form as $key => $val) {
-                if($val instanceof JRegistry){
-                $data = &$val;
-                break;
-                }
-            }
-            $data = $data->toArray();
-            $selectedOptions = $data['params']['section_id'];
-            foreach ($categories as $category) {
-                $selected = '';
-                if(isset($selectedOptions)){
-                    $selected = in_array($category['id'], $selectedOptions) ? ' selected="selected"': '';
-                }
-                $options.='<option value="'.$category['id'].'"'.$selected.'>'.$category['title'].'</option>'; 
-            }
-            $htmlCode .= $options;
-            $htmlCode .= '</select>';      
-            return $htmlCode;
+            $selectedOptions = $data['params']['k2cats'];
+            return k2categories::selectList($this->id, $this->name, $selectedOptions);
         }
         
         protected function getLabel(){

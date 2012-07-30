@@ -3,7 +3,7 @@
 /**
  * A factory class for making standard object from Joomla articles.
  * 
- * $Id: jArticle.php 15 2012-07-02 07:12:44Z webbochsant@gmail.com $
+ * $Id: jArticle.php 16 2012-07-28 11:40:39Z webbochsant@gmail.com $
  * @author Daniel Eliasson <joomla at stilero.com>
  * @license	GPLv3
  * 
@@ -28,6 +28,10 @@
  * along with jArticle.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
+
+// no direct access
+defined('_JEXEC') or die('Restricted access');
+
 class jArticle {
     var $articleObj;
     
@@ -40,7 +44,8 @@ class jArticle {
         //unset($value);
         //$object = (unset)$object;
         $tempClass->jVersion = $this->jVersion();
-        $tempClass->category_title = ($tempClass->jVersion == '1.5') ? $tempClass->category : $tempClass->category_title;
+        //$tempClass->category_title = ($tempClass->jVersion == '1.5') ? $tempClass->category : $tempClass->category_title;
+        $tempClass->category_title = $this->categoryTitle($article);
         $tempClass->description = $this->description($article);
         $tempClass->isPublished = $this->isPublished($article);
         $tempClass->isPublic = $this->isPublic($article);
@@ -70,17 +75,23 @@ class jArticle {
 
     public function image($article){
         $image = $this->introImage($article);
+        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > introImage='.$image );
         if ($image == '' ){
             $image = $this->fullTextImage($article);
+            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > fullTextImage='.$image );
         }
         if ($image == '' ){
             $image = $this->firstImageInContent($article);
+            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > firstImgInCont='.$image );
         }
         return $image;
     }
     
     public function imagesInContent($article){
         $content = $article->text;
+        $content = $content == '' ? $article->fulltext : $content;
+        $content = $content == '' ? $article->introtext : $content;
+        //if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > content='.$content );
         if( ($content == '') || (!class_exists('DOMDocument')) ){
             return;
         }
@@ -95,11 +106,17 @@ class jArticle {
                 'class' => $image->getAttribute('class'),
             );
         }
+        //if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > imagesInContent='.implode(', ', $images[0]) );
         return $images;
     }
     
     public function firstImageInContent($article){
-        if(!isset($article->text)) return;
+        $content = $article->text;
+        $content = $content == '' ? $article->fulltext : $content;
+        $content = $content == '' ? $article->introtext : $content;
+        if( $content == ''){
+            return;
+        }
         $images = $this->imagesInContent($article);
         $image = (isset($images[0]['src'])) ? $images[0]['src'] : '';
         if($image != ""){
@@ -173,7 +190,10 @@ class jArticle {
         $catAlias = $this->categoryAlias($article);
         $articleSlug = $this->articleSlug($article);
         $catSlug = $article->catid.':'.$catAlias;
-        $isSh404SefExtensionEnabled = JComponentHelper::isEnabled('com_sh404sef', true);
+        $isSh404SefExtensionEnabled = FALSE;
+        if($this->isExtensionInstalled('com_sh404sef')){
+             $isSh404SefExtensionEnabled = JComponentHelper::isEnabled('com_sh404sef', true);
+        }
         if($isSh404SefExtensionEnabled && JPATH_BASE == JPATH_ADMINISTRATOR){
             $this->_initSh404SefUrls();
         }
@@ -207,7 +227,23 @@ class jArticle {
         $joomlaRouter->attachParseRule( array( $pageInfo->router, 'parseRule'));
         $joomlaRouter->attachBuildRule( array( $pageInfo->router, 'buildRule'));
     }
-   
+    
+    protected function isExtensionInstalled($option){
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('extension_id AS id, element AS "option", params, enabled');
+        $query->from('#__extensions');
+        $query->where($query->qn('type') . ' = ' . $db->quote('component'));
+        $query->where($query->qn('element') . ' = ' . $db->quote($option));
+        $db->setQuery($query);
+        //$result = $db->query($query);
+        $result = $db->loadObject();
+        if($result == null){
+            return false;
+        }
+        return TRUE;
+    }
+    
     public function url($article){
         return $this->_joomlaSefUrlFromRoute($article);
     }
@@ -310,8 +346,10 @@ class k2Article extends jArticle{
         $catid = isset($article->catslug) ? '&catid='.$article->catslug : '';
         $articleID = isset($article->id) ? '&id=' . $article->id . ':'.  $article->alias : '';
         $url = JRoute::_( 'index.php?option=com_k2&view=item' . $catid . $articleID);
+        $url = str_replace('/administrator', '', $url);
         $parsedRootURL = parse_url(JURI::root());
-        $fullUrl = preg_match('/http/', $url)? $url :  $parsedRootURL['scheme'].'://'.$parsedRootURL['host']. $url;
+        $host = str_replace("/administrator", "", $parsedRootURL['host']);
+        $fullUrl = preg_match('/http/', $url)? $url :  $parsedRootURL['scheme'].'://'.$host. $url;
         return $fullUrl;
     }
    
@@ -330,8 +368,91 @@ class zooArticle extends jArticle{
  * For VirtueMart
  */
 class vmArticle extends jArticle{
+    
+    var $productImage;
+    
     public function __construct($article) {
         parent::__construct($article);
+        $this->articleObj->modified = $article->modified_on;
+        $this->articleObj->created = $article->created_on;
+        $this->articleObj->title = $article->product_name;
+        $this->articleObj->catid = $article->virtuemart_category_id;
+        if($article->virtuemart_product_id != ""){
+            $this->articleObj->id = $article->virtuemart_product_id;
+        }else if($article->virtuemart_product_id != ""){
+            $this->articleObj->id = $article->product_id;
+        }
+
     }
+    
+    public function categoryTitle($article){
+        $category_title = isset($article->category_name) ? $article->category_name : '';
+        return $category_title;
+    }
+    
+    public function description($article){
+        $descText = $article->product_desc != "" ? $article->product_desc : '';
+        //$description = $article->text!="" ? $article->text : '';
+        if(isset($article->product_s_desc) && $article->product_s_desc != ""){
+            $descText = $article->product_s_desc;
+        }
+        $descNeedles = array("\n", "\r", "\"", "'");
+        $descText = str_replace($descNeedles, " ", $descText );
+        $description = substr(htmlspecialchars( strip_tags($descText), ENT_COMPAT, 'UTF-8'), 0, 250);
+        return $description;
+    }
+    
+    public function isPublished($article){
+        if($article->published == '1' ){
+            return true;
+        }
+        return false;
+    }
+    
+    public function isPublic($article){
+        return true;
+    }
+    
+    public function image($article){
+        if($this->productImage != ''){
+            return $this->productImage;
+        }
+        $db =& JFactory::getDBO();
+        $query =
+            'SELECT medias.file_url_thumb'.
+            ' FROM '.$db->nameQuote('#__virtuemart_product_medias').' AS '.$db->nameQuote('xref').
+            ' LEFT JOIN '.$db->nameQuote('#__virtuemart_medias').' AS '.$db->nameQuote('medias').
+            ' ON medias.virtuemart_media_id = xref.virtuemart_media_id'.
+            ' WHERE xref.virtuemart_product_id = '.$db->quote($article->virtuemart_product_id)
+        ;
+        $db->setQuery($query);    
+        $imagePath = $db->loadResult();
+        $this->productImage = $imagePath!='' ? JURI::root().$imagePath : '';
+        return $this->productImage;
+    }
+    
+    public function firstImageInContent($article){
+        return $this->image($article);
+    }
+    
+    public function introImage($article){
+        return $this->image($article);
+    }
+    public function fullTextImage($article){
+        return $this->image($article);
+    }
+    public function imagesInContent($article){
+        $images = array($this->image($article));
+        return $images;
+    }
+    
+    public function url($article){
+        $u =& JURI::getInstance( JURI::root() );
+        $host = $u->getHost();
+        $scheme = $u->getScheme();
+        $url = $scheme.'://'.$host.$article->link;
+        return $url;
+    }
+    
 }
 ?>

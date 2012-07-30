@@ -42,6 +42,8 @@ class plgSystemAutofbook extends JPlugin {
     var $fbOauthAccessToken;
     var $fbOauthCode;
     var $classes;
+    var $jArticleClassNames;
+
     const HTTP_STATUS_OK = '200';
     const ERROR_RETURNURL_NOT_SPECIFIED = '10';
     const ERROR_AUTHTOKENURL_NOT_SPECIFIED = '11';
@@ -85,6 +87,7 @@ class plgSystemAutofbook extends JPlugin {
             'fbControllerFile'      =>      'fbControllerClass.php',
             'fbPageID'              =>      $this->params->def('fb_page_id'),
             'categoriesToShare'     =>      $this->params->def('section_id'),
+            'k2CategoriesToShare'   =>      $this->params->def('k2cats'),
             'shareDelay'            =>      $this->params->def('delay'),
             'articlesNewerThan'     =>      $this->params->def('items_newer_than'),
             'addOGTags'             =>      $this->params->def('add_ogtags'),
@@ -113,6 +116,13 @@ class plgSystemAutofbook extends JPlugin {
                 'file'=>'fbControllerClass.php'
             )
         );
+        $this->jArticleClassNames = array(
+            'com_article'       =>  'jArticle',
+            'com_content'       =>  'jArticle',
+            'com_k2'            =>  'k2Article',
+            'com_zoo'           =>  'zooArticle',
+            'com_virtuemart'    =>  'vmArticle'
+        );
         $this->preloadClasses();
         //JError::raiseNotice( 0,'afb-constructor-token1:'.$this->params->def('auth_token') );
 
@@ -128,14 +138,9 @@ class plgSystemAutofbook extends JPlugin {
      * @since 1.6
      */
     public function onContentAfterSave($context, &$article, $isNew) {
-        //$dispatcher =& JDispatcher::getInstance();
-        //$results = $dispatcher->trigger( 'onContentAfterDisplay', array( $context, &$article, &$params ) );
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->inBackend = true;
         $this->prepareToPost($article);
-        JError::raiseNotice( 0, $this->CheckClass->articleObject->url );
-        //JError::raiseNotice( 0, $this->CheckClass->articleObject->testSEFURL($article) );
-        //return;
         $this->postArticleToFB();
         return;
     }
@@ -155,6 +160,12 @@ class plgSystemAutofbook extends JPlugin {
         return;
     }
 
+    public function onAfterK2Save(&$article, $isNew){
+        $this->inBackend = true;
+        $this->prepareToPost($article);
+        $this->postArticleToFB();
+        return;
+    }
     /**
      * Called when articles are viewed in the frontend.
      * @param type $article
@@ -178,7 +189,7 @@ class plgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */
-    function onContentAfterDisplay( $context, &$article, &$params, $limitstart=0) {
+    function onContentAfterDisplay( $context, $article, &$params, $limitstart=0) {
         $this->inBackend = false;
         $this->prepareToPost($article);
         $this->postArticleToFB();
@@ -194,6 +205,7 @@ class plgSystemAutofbook extends JPlugin {
      * @since 1.5
      */
     function onPrepareContent(  &$article, &$params, $limitstart=0 ) {
+        $this->prepareToPost($article);
         $this->insertOGTags($article);
         return;
     }
@@ -207,6 +219,7 @@ class plgSystemAutofbook extends JPlugin {
      * @since 1.6
      */    
     function onContentPrepare(  $context, &$article, &$params, $page=0 ) {
+        $this->prepareToPost($article);
         $this->insertOGTags($article);
         return;
     }
@@ -244,10 +257,11 @@ class plgSystemAutofbook extends JPlugin {
     private function prepareToPost($article){
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->setupClasses();
-        $articleFactory = new jArticle($article);
-        $articleObject = $articleFactory->getArticleObj();
-        //$articleObject = $this->getArticleObjectFromJoomlaArticle($article);
-        $this->CheckClass->setArticleObject($articleObject);        
+        $articleObject = $this->loadJArticleClass($article);
+        if(!$articleObject){
+            return;
+        }
+        $this->CheckClass->setArticleObject($articleObject); 
     }
     
     private function preloadClasses(){
@@ -261,10 +275,20 @@ class plgSystemAutofbook extends JPlugin {
         }
     }
     
+    private function loadJArticleClass($article){
+      $component = JRequest::getVar('option');
+        if(array_key_exists($component, $this->jArticleClassNames)){
+            $className = $this->jArticleClassNames[$component];
+            JLoader::register( $className, dirname(__FILE__).DS.'autofbook'.DS.'classes'.DS.'jArticle.php');
+            $articleFactory = new $className($article);
+            $articleObject = $articleFactory->getArticleObj();
+            return $articleObject;
+        }
+        return false;
+   }
+    
     private function setupClasses() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        //$this->preloadClasses();
-        //$token = $this->params->def('fbpage_auth_token') == '' ? $this->fbOauthAccessToken : $this->params->def('fbpage_auth_token');
         $this->CheckClass = new $this->classes['fbControllerClass']['name']( 
             array(
                 'fbAppID'               =>      $this->fbAppID,
@@ -275,6 +299,7 @@ class plgSystemAutofbook extends JPlugin {
                 'shareLogTableName'     =>      $this->config['shareLogTableName'],
                 'pluginLangPrefix'      =>      $this->config['pluginLangPrefix'],
                 'categoriesToShare'     =>      $this->config['categoriesToShare'],
+                'k2CategoriesToShare'   =>      $this->config['k2CategoriesToShare'],
                 'shareDelay'            =>      $this->config['shareDelay'],
                 'articlesNewerThan'     =>      $this->config['articlesNewerThan'],
                 'inBackend'             =>      $this->inBackend,
@@ -348,45 +373,16 @@ class plgSystemAutofbook extends JPlugin {
         return TRUE;
     }
 
-//    public function getArticleObjectFromJoomlaArticle($joomlaArticle) {
-//        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-//        $articleObject = new stdClass();
-//        $articleObject->id = $joomlaArticle->id;
-//        $articleObject->language= (isset($joomlaArticle->language))? $joomlaArticle->language : '';
-//        $articleObject->link = $joomlaArticle->alias;
-//        $articleObject->full_url = $this->getFullURL($joomlaArticle->id);
-//        $articleObject->tags = $this->getArticleTagsArray($joomlaArticle->metakey);
-//        $articleObject->title = $joomlaArticle->title;
-//        $articleObject->catid = $joomlaArticle->catid;
-//        $articleObject->access = $joomlaArticle->access;
-//        $articleObject->publish_up = $joomlaArticle->publish_up;
-//        $articleObject->published = $joomlaArticle->state; 
-//        return $articleObject;
-//    }
-
-//    public function getFullURL($articleID) {
-//        $urlQuery = "?option=com_content&view=article&id=".$articleID;
-//        $fullURL = JURI::root()."index.php".$urlQuery;
-//        return $fullURL;
-//    }
-    
-//    private function getArticleTagsArray($commaSpearatedMetaKeys) {
-//        if($commaSpearatedMetaKeys == ""){
-//            return;
-//        }
-//       $metaKeyArray = explode(",", $commaSpearatedMetaKeys);
-//       foreach ($metaKeyArray as $key => $value) {
-//           $tagsArray[] = trim(str_replace(" ", "", $value));
-//       }
-//       return $tagsArray;
-//    }
-
-    private function insertOGTags($articleObj){
-        if( $this->params->def('add_ogtags')==0 || !isset($articleObj->id) || $this->ogTagsAdded ){
+    private function insertOGTags($article){
+        if( $this->params->def('add_ogtags')==0 || $this->ogTagsAdded ){
+            return;
+        }
+        $articleObject = $this->loadJArticleClass($article);
+        if(!$articleObject){
             return;
         }
         $document = JFactory::getDocument();
-        $metaDataArray = $this->getMetaDataArray($articleObj);
+        $metaDataArray = $this->getMetaDataArray($articleObject);
         foreach ($metaDataArray as $key => $value) {
             if($value !="") {
                 $metaProp = '<meta property="'.$key.'" content="'.$value.'" />';
@@ -396,11 +392,17 @@ class plgSystemAutofbook extends JPlugin {
         $this->ogTagsAdded = true;
     }
 
-    private function getMetaDataArray($articleObj){
-        $articleFactory = new jArticle($articleObj);
-        $article = $articleFactory->getArticleObj();
-        $imageSrc = $article->image; 
-        $imageSrc = ( $imageSrc != '' )? $imageSrc : JURI::root().'images'.DS.$this->params->def('og-img-default');
+    private function getMetaDataArray($article){
+        //$articleFactory = new jArticle($articleObj);
+        //$article = $articleFactory->getArticleObj();
+        $imageSrc = $this->CheckClass->articleObject->image;
+        //var_dump($this->CheckClass->articleObject);exit;
+        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > article->image='.$imageSrc );
+        if($imageSrc == ''){
+            $imageSrc = JURI::root().'images/'.$this->params->def('og-img-default');
+            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > No images found, setting default: '.$imageSrc );
+        }
+        //$imageSrc = ( $imageSrc != '' )? $imageSrc : JURI::root().'images/'.$this->params->def('og-img-default');
         $descNeedles = array("\n", "\r", "\"", "'");
         //$desc = (isset($article->description) )? strip_tags( str_replace($descNeedles, " ", $article->description )) : "";
         $desc = (isset($article->description) )? $article->description  : "";
@@ -422,34 +424,6 @@ class plgSystemAutofbook extends JPlugin {
         );
         return $metaData;
     }
-
-//    private function getImageSrcFromContent($articleObj) {
-//        preg_match_all('/<img[^>]+>/i',$articleObj->text, $imageNodes);
-//
-//        $img = array();
-//        foreach( $imageNodes as $imgTag) {
-//            $pattern = "/src=[\"']?([^\"']?.*(png|jpg|gif))[\"']?/i";
-//            preg_match_all($pattern, $articleObj->text, $img);
-//        }
-//        $firstImageSrc = "";
-//        if( !empty($img) ) {
-//            $imgArr = $img[1];
-//            $firstImageSrc = (isset($imgArr[0])) ? $this->getAbsUrl( $imgArr[0] ) : null;
-//        }
-//        return $firstImageSrc; 
-//    }
-
-//    private function getAbsUrl($url){
-//        if($url == "") return;
-//        $parsedURL = parse_url($url);
-//        $query = ( isset($parsedURL['query']) ) ? "?".$parsedURL['query'] : "" ;
-//        $path = $parsedURL['path'];
-//        if(strlen($parsedURL['path'])>2){
-//            $path = (substr_count($parsedURL['path'] , '/', 0, 1))? substr($parsedURL['path'], 1) : $parsedURL['path'];
-//        }
-//        $absURL = JURI::root().$path.$query;
-//        return $absURL;
-//    }
     
     public function displayMessage($msg, $messageType = "") {
         if(JDEBUG) JFactory::getApplication()->enqueueMessage( $msg, $messageType);

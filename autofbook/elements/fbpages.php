@@ -93,7 +93,14 @@ if(version_compare(JVERSION, '1.6.0', '<')){
             return fbPages::pagesList($control_name.$name, $name);
         }
         function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
-            
+            $output = '<label id="'.$control_name.$name.'-lbl" for="'.$control_name.$name.'"';
+            if ($description) {
+                    $output .= ' class="hasTip" title="'.JText::_($label).'::'.JText::_($description).'">';
+            } else {
+                    $output .= '>';
+            }
+            $output .= JText::_( $label ).'</label>';
+            return $output;    
         }
     }//End Class J1.5
 }else{

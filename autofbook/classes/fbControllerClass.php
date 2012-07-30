@@ -28,6 +28,7 @@
  * along with AutoFBook.  
  * If not, see <http://www.gnu.org/licenses/>.
  */
+
 class fbControllerClass extends stlShareControllerClass{
     const HTTP_STATUS_FOUND = 302; //All ok but prefers other options
     const HTTP_STATUS_OK = 200; //Returned on all ok

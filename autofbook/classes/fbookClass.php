@@ -116,7 +116,6 @@ class FBookClass {
         $response = $this->query($graphURL, $postvars);
         $this->handleResponse($response);
         return !$this->hasErrorOccured();
-        //}
     }
     
     public function postStatusMessageToFB($message){

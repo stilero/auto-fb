@@ -1,15 +1,4 @@
 <?php
-//private function requestAccessTokenForApp(){
-//        $postVars = array(
-//            'client_id'     =>  $this->getAppID(),
-//            'client_secret' =>  $this->fbAppSecret,
-//            'redirect_uri'    =>  $this->config['redirectURI'],
-//            'code' =>  $this->fbOauthCode
-//        );
-//        //print $this->config['graphAccessToken']."?".http_build_query($postVars);exit;
-//        return $this->doQueryFB('https://graph.facebook.com/oauth/access_token', $postVars);
-//    }
-    
     require_once '../classes/fbookClass.php';
     $appID = filter_var($_POST['client_id'], FILTER_SANITIZE_NUMBER_INT);
     $appSecret = filter_var($_POST['client_secret'], FILTER_SANITIZE_STRING);
