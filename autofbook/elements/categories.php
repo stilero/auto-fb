@@ -65,6 +65,7 @@ class Categories{
             );
         $cats = $isJ15 ? self::getJ15Categories() : self::getCategories();
         $categories = array_merge($defaultOption, $cats);
+        $options = '';
         foreach ($categories as $category) {
             $selected = '';
             if(isset($selectedIDs) && $selectedIDs !=""){
@@ -122,7 +123,10 @@ if(version_compare(JVERSION, '1.6.0', '<')){
                 }
             }
             $data = $data->toArray();
-            $selectedOptions = $data['params']['section_id'];
+            $selectedOptions = '';
+            if(isset($data['params']['section_id'])){
+                $selectedOptions = $data['params']['section_id'];
+            }
             return Categories::selectList($this->id, $this->name, $selectedOptions);
             $htmlCode = '<select id="'.$this->id.'" name="'.$this->name.'[]" class="inputbox" multiple="multiple">';
             $defaultOption = array(

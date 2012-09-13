@@ -56,7 +56,7 @@ class fbPages{
     static function pagesList($id, $name=''){
         $htmlCode =
         '<select id="'.$id.'" name="'.$name.'">'.
-        '<option selected="selected" value="me">'.JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_PERSONAL).'</option>'.
+        '<option selected="selected" value="me">'.JText::_('PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_PERSONAL').'</option>'.
         '</select>';
        
         return $htmlCode;
@@ -74,8 +74,8 @@ class fbPages{
     
     static function addTranslationJS(){
         $document =& JFactory::getDocument();
-        $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS).'";';
-        $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_FAILURE).'";';
+        $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS').'";';
+        $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_FAILURE').'";';
         $document->addScriptDeclaration($jsTranslationStrings);        
     }
 }
@@ -118,8 +118,8 @@ if(version_compare(JVERSION, '1.6.0', '<')){
         }
         
         protected function getLabel(){
-            $toolTip = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_TEXT);
-            $text = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_LABEL);
+            $toolTip = JText::_($this->element['description']);
+            $text = JText::_($this->element['label']);
             $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$text.'::'.$toolTip.'">'.$text.'</label>';
             return $labelHTML;
         }

@@ -337,6 +337,49 @@ class k2Article extends jArticle{
         $tempClass->category_title = $this->categoryTitle($article);
     }
     
+    protected function introImage($article){
+        $introImageURL = $article->imageMedium;
+        $introImageURL = $introImageURL=='' ? $article->imageLarge : $introImageURL;
+        $introImageURL = $introImageURL=='' ? $article->imageXLarge : $introImageURL;
+        $introImageURL = $introImageURL=='' ? $article->imageSmall : $introImageURL;
+        $introImageURL = $introImageURL=='' ? $article->imageXSmall : $introImageURL;
+        
+        $parsedURL = parse_url(JURI::root());
+        $parsedImageURL = '';
+        if( $introImageURL != '' ){
+            $parsedImageURL = str_replace($parsedURL['path'], '', $introImageURL);
+        }
+        return $parsedImageURL;
+    }
+    
+    protected function fullTextImage($article){
+        $fullText = $article->fulltext;
+        $contentImages = $this->imagesInTextContent($fullText);
+        if(empty($contentImages)){
+            return;
+        }
+        $firstContentImage = $contentImages[0]['src'];
+        return $firstContentImage;
+    }
+    
+    public function imagesInTextContent($textContent){
+        if( ($textContent == '') || (!class_exists('DOMDocument')) ){
+            return;
+        }
+        $html = new DOMDocument();
+        $html->recover = true;
+        $html->strictErrorChecking = false;
+        $html->loadHTML($textContent);
+        $images = array();
+        foreach($html->getElementsByTagName('img') as $image) {
+            $images[] = array(
+                'src' => $image->getAttribute('src'),
+                'class' => $image->getAttribute('class'),
+            );
+        }
+        return $images;
+    }
+    
     public function categoryTitle($article){
         $category_title = $article->category->name;
         return $category_title;

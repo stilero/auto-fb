@@ -94,8 +94,8 @@ EOD;
             '<a '.
             'id="'.$id.'" '.
             'class="fbconnect" '.
-            'title="'.JText::_('MOD_INSTAGRAM_AUTHORIZE').'" '.
-            'href="'.$link.'" '.
+            'title="Connect" '.
+            'href="#" '.
             'target="_blank" >'.
             //'<img src="'.$buttonImage.'" />'.
             'Connect to FB'.
@@ -108,8 +108,11 @@ EOD;
     
     static function addTranslationJS(){
         $document =& JFactory::getDocument();
-        $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS).'";';
-        $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_(PLG_SYSTEM_AUTOFBOOK_JS_FAILURE).'";';
+//        $language = JFactory::getLanguage();
+//        $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, 'en-GB', true);
+//        $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, null, true);
+        $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS').'";';
+        $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_FAILURE').'";';
         $document->addScriptDeclaration($jsTranslationStrings);        
     }
     

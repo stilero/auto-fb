@@ -56,6 +56,7 @@ class k2categories{
                 'id' => '', 
                 'name' => 'none')
             );
+        $options = '';
         $categories = array_merge($defaultOption, $cats);
         foreach ($categories as $category) {
             $selected = '';
@@ -85,7 +86,9 @@ if(version_compare(JVERSION, '1.6.0', '<')){
                 }
             }
             $data = $data->toArray();
-            $selectedOptions = $data['params']['k2cats'];
+            if(isset($data['params']['k2cats'])){
+                $selectedOptions = $data['params']['k2cats'];
+            }
             return k2categories::selectList($this->id, $this->name, $selectedOptions);
         }
         function fetchTooltip ( $label, $description, &$xmlElement, $control_name='', $name=''){
@@ -116,8 +119,11 @@ if(version_compare(JVERSION, '1.6.0', '<')){
                 break;
                 }
             }
+            $selectedOptions = '';
             $data = $data->toArray();
-            $selectedOptions = $data['params']['k2cats'];
+            if(isset($data['params']['k2cats'])){
+                $selectedOptions = $data['params']['k2cats'];
+            }
             return k2categories::selectList($this->id, $this->name, $selectedOptions);
         }
         

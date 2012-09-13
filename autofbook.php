@@ -382,6 +382,10 @@ class plgSystemAutofbook extends JPlugin {
             return;
         }
         $document = JFactory::getDocument();
+        $doctype    = $document->getType();
+        if ( $doctype !== 'html' ) { 
+            return; 
+        }
         $metaDataArray = $this->getMetaDataArray($articleObject);
         foreach ($metaDataArray as $key => $value) {
             if($value !="") {

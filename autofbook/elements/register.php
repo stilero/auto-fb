@@ -73,9 +73,9 @@ if(version_compare(JVERSION, '1.6.0', '<')){
         }
         
         protected function getLabel(){
-            $toolTip = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_REGISTER_TOOLTIP_DESC);
-            $label = JText::_(PLG_SYSTEM_AUTOFBOOK_ELEMENT_REGISTER_TOOLTIP_LABEL);
-            $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$label.'::'.$toolTip.'">'.$label.'</label>';
+            $toolTip = JText::_($this->element['description']);
+            $text = JText::_($this->element['label']);
+            $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$text.'::'.$toolTip.'">'.$text.'</label>';
             return $labelHTML;
         }
     }//End Class

@@ -26,8 +26,7 @@ EOD;
         $parsedResp = parse_str($response);
         $response = <<<EOD
 {
-   "access_token": "$access_token",
-   "expires": "$expires"
+   "access_token": "$access_token"
 }
 EOD;
     }
