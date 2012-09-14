@@ -3,7 +3,8 @@
 /**
  * A factory class for making standard object from Joomla articles.
  * 
- * $Id: jArticle.php 16 2012-07-28 11:40:39Z webbochsant@gmail.com $
+ * $Id: jArticle.php 23 2012-09-14 11:33:02Z webbochsant@gmail.com $
+ * @version $Rev: 23 $
  * @author Daniel Eliasson <joomla at stilero.com>
  * @license	GPLv3
  * 
@@ -311,6 +312,10 @@ class jArticle {
     }
     
     public function isPublished($article){
+        $isPublState = $article->state == '1' ? true : false;
+        if(!$isPublState){
+            return FALSE;
+        }
         $publishUp = isset($article->publish_up) ? $article->publish_up : '';
         $publishDown = isset($article->publish_down) ? $article->publish_down : '';
         if($publishUp == '' ){
