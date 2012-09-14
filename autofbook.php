@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 4.00 $Id: autofbook.php 31 2012-03-27 10:47:44Z webbochsant@gmail.com $
+ * @version 4.1 2012-09-14 13:47 $
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
