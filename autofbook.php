@@ -219,8 +219,10 @@ class plgSystemAutofbook extends JPlugin {
      * @since 1.6
      */    
     function onContentPrepare(  $context, &$article, &$params, $page=0 ) {
-        $this->prepareToPost($article);
-        $this->insertOGTags($article);
+        $isPrepared = $this->prepareToPost($article);
+        if($isPrepared){
+            $this->insertOGTags($article);
+        }
         return;
     }
     
@@ -258,10 +260,16 @@ class plgSystemAutofbook extends JPlugin {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->setupClasses();
         $articleObject = $this->loadJArticleClass($article);
-        if(!$articleObject){
-            return;
+        if(!is_object($articleObject)){
+            return FALSE;
         }
-        $this->CheckClass->setArticleObject($articleObject); 
+        $this->CheckClass->setArticleObject($articleObject);
+        $hasId = isset($this->CheckClass->articleObject->id)? TRUE : FALSE;
+        $hasTitle = isset($this->CheckClass->articleObject->title)? TRUE : FALSE;
+        if(!$hasId || !$hasTitle){
+            return FALSE;
+        }
+        return TRUE;
     }
     
     private function preloadClasses(){

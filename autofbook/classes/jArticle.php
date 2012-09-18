@@ -3,8 +3,8 @@
 /**
  * A factory class for making standard object from Joomla articles.
  * 
- * $Id: jArticle.php 23 2012-09-14 11:33:02Z webbochsant@gmail.com $
- * @version $Rev: 23 $
+ * $Id: jArticle.php 24 2012-09-18 19:27:16Z webbochsant@gmail.com $
+ * @version $Rev: 24 $
  * @author Daniel Eliasson <joomla at stilero.com>
  * @license	GPLv3
  * 
@@ -72,7 +72,6 @@ class jArticle {
         }
         return $category_title;
     }
-
 
     public function image($article){
         $image = $this->introImage($article);
@@ -312,6 +311,7 @@ class jArticle {
     }
     
     public function isPublished($article){
+        if(JDEBUG) JFactory::getApplication()->enqueueMessage( var_dump($article));
         $isPublState = $article->state == '1' ? true : false;
         if(!$isPublState){
             return FALSE;
@@ -331,6 +331,19 @@ class jArticle {
             return TRUE;
         }
     }
+    
+    public function isArticle(){
+        $hasID = isset($this->articleObj->id) ? TRUE : FALSE;
+        $hasTitle = isset($this->articleObj->title) ? TRUE : FALSE;
+        if($hasID && $hasTitle){
+            return TRUE;
+        }
+        return FALSE;
+    }
+
+    public function __get($name) {
+        return $this->$name;
+    }
 }
 
 /**
@@ -343,23 +356,38 @@ class k2Article extends jArticle{
     }
     
     protected function introImage($article){
-        $introImageURL = $article->imageMedium;
-        $introImageURL = $introImageURL=='' ? $article->imageLarge : $introImageURL;
-        $introImageURL = $introImageURL=='' ? $article->imageXLarge : $introImageURL;
-        $introImageURL = $introImageURL=='' ? $article->imageSmall : $introImageURL;
-        $introImageURL = $introImageURL=='' ? $article->imageXSmall : $introImageURL;
-        
-        $parsedURL = parse_url(JURI::root());
+        $imageUrl = '';
+        if(isset($article->imageMedium)){
+            $imageUrl = $article->imageMedium;
+        }
+        if($imageUrl=='' && isset($article->imageLarge)){
+            $imageUrl = $article->imageLarge;
+        }
+        if($imageUrl=='' && isset($article->imageXLarge)){
+            $imageUrl = $article->imageXLarge;
+        }
+        if($imageUrl=='' && isset($article->imageSmall)){
+            $imageUrl = $article->imageSmall;
+        }
+        if($imageUrl=='' && isset($article->imageXSmall)){
+            $imageUrl = $article->imageXSmall;
+        }
+        $parsedRootUrl = parse_url(JURI::root());
         $parsedImageURL = '';
-        if( $introImageURL != '' ){
-            $parsedImageURL = str_replace($parsedURL['path'], '', $introImageURL);
+        if( $imageUrl != '' ){
+            $parsedImageURL = str_replace($parsedRootUrl['path'], '', $imageUrl);
         }
         return $parsedImageURL;
     }
     
     protected function fullTextImage($article){
-        $fullText = $article->fulltext;
-        $contentImages = $this->imagesInTextContent($fullText);
+        $fullText = '';
+        $contentImages = array();
+        if(isset($article->fulltext)){
+            $fullText = $article->fulltext;
+            $contentImages = $this->imagesInTextContent($fullText);
+
+        }
         if(empty($contentImages)){
             return;
         }
@@ -385,8 +413,34 @@ class k2Article extends jArticle{
         return $images;
     }
     
+    public function isPublished($article){
+        if(JDEBUG) JFactory::getApplication()->enqueueMessage( var_dump($article));
+        $isPublished = false;
+        if(isset($article->published)){
+            $isPublished = $article->published;
+        }
+        if($isPublished == FALSE){
+            return FALSE;
+        }
+        $publishUp = isset($article->publish_up) ? $article->publish_up : '';
+        $publishDown = isset($article->publish_down) ? $article->publish_down : '';
+        $date = JFactory::getDate();
+        $currentDate = $date->toMySQL();
+        if($publishUp > $currentDate){
+            return FALSE;
+        }else if($publishDown < $currentDate && $publishDown != '0000-00-00 00:00:00' && $publishDown!=""){
+            return FALSE;
+        }else {
+            return TRUE;
+        }
+        return TRUE;
+    }
+    
     public function categoryTitle($article){
-        $category_title = $article->category->name;
+        $category_title = '';
+        if(isset($article->category->name)){
+            $category_title = $article->category->name;
+        }
         return $category_title;
     }
     
@@ -501,6 +555,4 @@ class vmArticle extends jArticle{
         $url = $scheme.'://'.$host.$article->link;
         return $url;
     }
-    
 }
-?>
