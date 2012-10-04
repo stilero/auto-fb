@@ -66,8 +66,8 @@ class stlShareControllerClass {
             return FALSE;
         }
         if ( ! $this->articleObject->id ) {
-            $this->error['message'] = $this->config['pluginLangPrefix'].'NOT_OBJECT';
-            $this->error['type'] = 'error';
+            //$this->error['message'] = $this->config['pluginLangPrefix'].'NOT_OBJECT';
+            //$this->error['type'] = 'error';
             return FALSE;
         }
     }
