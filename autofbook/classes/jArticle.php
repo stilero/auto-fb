@@ -7,27 +7,6 @@
  * @version $Rev: 24 $
  * @author Daniel Eliasson <joomla at stilero.com>
  * @license	GPLv3
- * 
- * Joomla! is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
- * 
- * This file is part of jArticle.
- * 
- * jArticle is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * jArticle is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with jArticle.  If not, see <http://www.gnu.org/licenses/>.
- * 
  */
 
 // no direct access
@@ -322,7 +301,7 @@ class jArticle {
             return false;
         }
         $date = JFactory::getDate();
-        $currentDate = $date->toMySQL();
+        $currentDate = $date->toSql();
         if ( ($publishUp > $currentDate) ){
             return FALSE;
         }else if($publishDown < $currentDate && $publishDown != '0000-00-00 00:00:00' && $publishDown!=""){
@@ -425,7 +404,7 @@ class k2Article extends jArticle{
         $publishUp = isset($article->publish_up) ? $article->publish_up : '';
         $publishDown = isset($article->publish_down) ? $article->publish_down : '';
         $date = JFactory::getDate();
-        $currentDate = $date->toMySQL();
+        $currentDate = $date->toSql();
         if($publishUp > $currentDate){
             return FALSE;
         }else if($publishDown < $currentDate && $publishDown != '0000-00-00 00:00:00' && $publishDown!=""){

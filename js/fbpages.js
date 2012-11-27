@@ -11,7 +11,7 @@ window.addEvent('domready', function(){
     };
     
     var handlePageResponse = function(response){
-        if(!$defined(response.data)){
+        if(response.data == 'undefined'){
             var errormsg = '(' + response.code + ')' +
                 response.type + '\n' +
                 response.message;
@@ -19,8 +19,12 @@ window.addEvent('domready', function(){
         }else{
             //get the current options selectId's options
             //evalResponse(response, 'data');
-            var options = $(fbPagesElement).get('html'); 
-            $each(response.data, function(value, key){
+            var options = $(fbPagesElement).get('html');
+            //$.each(response.data, function(value, key){
+//                response.data.each(function(value, key){
+//                    alert(value.id);
+//                });
+            response.data.each(function(value, key){
                 var selected = (value.id == pageID) ? ' selected="selected" ' : '';
                 if(value.category != 'Application'){
                     //Object.append(pages, {'id': value.id, 'access_token': value.access_token});
@@ -31,6 +35,9 @@ window.addEvent('domready', function(){
                //$(fbPagesElement).add(newoption);
             });
             $(fbPagesElement).set('html', options);
+            $(fbPagesElement).setStyle('display', 'block');
+            $('jform_params_fb_pages_chzn').setStyle('display', 'none');
+
 
         }
     };

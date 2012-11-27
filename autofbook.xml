@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<install version="1.6" type="plugin" group="system" method="upgrade">
+<extension version="2.5" type="plugin" group="system" method="upgrade">
     <name>System - AutoFBook Plugin</name>
     <author>Daniel Eliasson (www.stilero.com)</author>
     <creationDate>2012-07-10</creationDate>
     <copyright>Copyright (c) 2011 Stilero AB. All rights reserved.</copyright>
     <authorEmail>joomla@stilero.com</authorEmail>
     <authorUrl>www.stilero.com</authorUrl>
-    <version>4.22</version>
+    <version>4.3</version>
     <license>GPLv2</license>
     <description>This plugin automatically posts your articles on your FaceBook status. If you like this plugin, show your love and write a review at http://extensions.joomla.org</description>
     <install>
@@ -34,231 +34,32 @@
         <language tag="sv-SE">sv-SE.plg_system_autofbook.ini</language>
         <language tag="fr-FR">fr-FR.plg_system_autofbook.ini</language>
     </languages>
-    <!-- Standard plugin parameters for Joomla! 1.5 -->
-
-    <params>
-        <!-- TODO: Find a way to select multiple categories
-        
-        <param 
-            type="category"
-            name="section_id"
-            label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
-            description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
-            multiple="true"
-            class="inputbox"
-        >
-        </param>
-        
-        
-        <param 
-            name="section_id" 
-            type="text"  
-            default="" 
-            label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" 
-            description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
-        />
-        -->
-        <param 
-            name="section_id"
-            type="categories"
-            label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
-            description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
-        />
-        <param 
-            name="incl_excl" 
-            type="radio" 
-            default="0" 
-            label="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL" 
-            description="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL_DESC"
-        >
-            <option value="0">PLG_SYSTEM_AUTOFBOOK_INCLUDE</option>
-            <option value="1">PLG_SYSTEM_AUTOFBOOK_EXCLUDE</option>
-        </param>
-        <param 
-            name="items_newer_than" 
-            type="calendar" 
-            label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" 
-            description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" 
-            format="%Y-%m-%d" 
-        />
-    </params>
-    <!--
-    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addpath="/plugins/system/autofbook/elements">
-    -->
-    <params group="advanced" label="PLG_SYSTEM_AUTOFBOOK_ADVSETTINGS" addpath="/plugins/system/autofbook/elements">
-            <field 
-                name="register" 
-                type="register" 
-                label="PLG_SYSTEM_AUTOFBOOK_ELEMENT_REGISTER_TOOLTIP_LABEL" 
-                description="PLG_SYSTEM_AUTOFBOOK_ELEMENT_REGISTER_TOOLTIP_DESC" 
-            />
-            <param 
-                name="fb_app_id" 
-                type="text"  
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_APPID" 
-                description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"
-            />
-            <param 
-                name="fb_app_secret" 
-                type="password"  
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" 
-                description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"
-            />
-            <param 
-                name="auth_token" 
-                type="password"  
-                default=""  
-                label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" 
-                description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"
-            />
-            <param 
-                name="auth_code" 
-                type="password"  
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" 
-                description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC" 
-            />
-            <!--
-            <param 
-                name="authorize" 
-                type="authorize" 
-                default=""
-                label="PLG_SYSTEM_AUTOFBOOK_ELEMENT_AUTHORIZE" 
-                description="PLG_SYSTEM_AUTOFBOOK_ELEMENT_AUTHORIZE_DESC" 
-            />
-            <param 
-                name="fbadmin" 
-                type="fbadmin" 
-                label="PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBADMIN" 
-                description="PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBADMIN_DESC" 
-            />
-            <param 
-                name="fb_pages" 
-                type="fbpages"  
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_LABEL" 
-                description="PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_TOOLTIP_LABEL_DESC"
-            />
-            -->
-            <param 
-                name="fb_page_id" 
-                type="text"  
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_PAGEID" 
-                description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"
-            />
-            <param 
-                name="fbpage_auth_token" 
-                type="hidden" 
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" 
-                description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"
-            />
-            <param 
-                name="fb_post_as_admin" 
-                type="radio" 
-                default="1" 
-                label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" 
-                description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC"
-            >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-            </param>
-            <param 
-                name="fb_post_type" 
-                type="list" 
-                default="0" 
-                label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" 
-                description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC"
-            >
-                <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
-                <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
-            </param>
-            <param 
-                name="delay" 
-                type="text"  
-                default="15" 
-                label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" 
-                description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"
-            />
-            <param 
-                name="pingmessages" 
-                type="radio" 
-                default="1" 
-                label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" 
-                description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC"
-            >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-            </param>
-            <param 
-                name="add_ogtags" 
-                type="radio" 
-                default="1" 
-                label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" 
-                description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC"
-            >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-            </param>
-            <field 
-                name="og-img-default" 
-                type="imagelist" 
-                hide_default="true" 
-                directory="images" 
-                default="" 
-                label="PLG_SYSTEM_AUTOFBOOK_OG_DEFAULT_IMG" 
-                description="PLG_SYSTEM_AUTOFBOOK_OG_DEFAULT_IMG_DESC"
-            />
-    </params>
-
     <!-- Standard plugin parameters for Joomla! 1.6+ -->
     <config>
         <fields name="params">
             <fieldset name="settings" label="PLG_SYSTEM_AUTOFBOOK_SETTINGS">
-                    <!--
-                    <field name="section_id" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID" description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"/>
-                    
-                    <field 
-                        name="section_id"
-                        type="SQL"
-                        class="inputbox"
-                        label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
-                        multiple="true"
-                        translate="true"
-                        query="SELECT id, title FROM #__categories WHERE extension='com_content' AND published = 1 ORDER BY title ASC"
-                        key_field="id"
-                        value_field="title"
-                        description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
-                    >
-                    </field>
-                    -->
-                    <field 
-                        name="section_id"
-                        type="categories"
-                        label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
-                        description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC"
-                    />
-                    <field 
-                        name="k2cats"
-                        type="k2categories"
-                        label="PLG_SYSTEM_AUTOFBOOK_PARAMK2CATS"
-                        description="PLG_SYSTEM_AUTOFBOOK_PARAMK2CATSDESC"
-                    />
-                    <field name="incl_excl" type="radio" default="0" label="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL" description="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL_DESC">
-                        <option value="0">PLG_SYSTEM_AUTOFBOOK_INCLUDE</option>
-                        <option value="1">PLG_SYSTEM_AUTOFBOOK_EXCLUDE</option>
-                    </field>
-                    <field name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
+                <field 
+                    name="section_id"
+                    type="categories"
+                    label="PLG_SYSTEM_AUTOFBOOK_PARAMSECTID"
+                    description="PLG_SYSTEM_AUTOFBOOK_PARAMSECTIDDESC" />
+                <field 
+                    name="k2cats"
+                    type="k2categories"
+                    label="PLG_SYSTEM_AUTOFBOOK_PARAMK2CATS"
+                    description="PLG_SYSTEM_AUTOFBOOK_PARAMK2CATSDESC" />
+                <field name="incl_excl" type="radio" default="0" label="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL" description="PLG_SYSTEM_AUTOFBOOK_INCL_EXCL_DESC">
+                    <option value="0">PLG_SYSTEM_AUTOFBOOK_INCLUDE</option>
+                    <option value="1">PLG_SYSTEM_AUTOFBOOK_EXCLUDE</option>
+                </field>
+                <field name="items_newer_than" type="calendar" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEMSNEWER_DESC" format="%Y-%m-%d" />
             </fieldset>
             <fieldset name="advanced" label="PLG_SYSTEM_AUTOFBOOK_FBSETTINGS" addfieldpath="/plugins/system/autofbook/autofbook/elements">
                 <field name="register" type="register" label="" />
                 <field name="fb_app_id" type="text" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
                 <field name="fb_app_secret" type="password" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
-                <field name="auth_token" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
-                <field name="auth_code" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
+                <field name="auth_token" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
+                <field name="auth_code" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
                 <field name="authorize" type="authorize" label="" />
                 <field name="fbadmin" type="fbadmin" label="" />
                 <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
@@ -303,4 +104,4 @@
             <language tag="fr-FR">fr-FR.plg_system_autofbook.ini</language>
         </languages>
     </administration>
-</install>
+</extension>

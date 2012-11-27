@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 4.2 2012-09-18 21:31 $
+ * @version 4.3 2012-09-18 21:31 $
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
@@ -28,6 +28,9 @@
 
 // no direct access
 defined('_JEXEC') or die ('Restricted access');
+if(!defined('DS')){
+    define('DS',DIRECTORY_SEPARATOR);
+}
 
 jimport('joomla.plugin.plugin');
 

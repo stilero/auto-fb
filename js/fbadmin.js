@@ -2,7 +2,7 @@ window.addEvent('domready', function(){
     
     var handleResponse = function(response){
         //checkResponse(response);
-        if(!$defined(response.name)){
+        if(response.name == 'undefined'){
             var errormsg = '(' + response.code + ')' +
                 response.type + '\n' +
                 response.message;
