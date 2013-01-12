@@ -64,7 +64,7 @@ class plgSystemAutofbook extends JPlugin {
     var $authorization_response_type = "response_type=token";
     var $ogTagsAdded = false;
 
-    public function plgSystemAutofbook( &$subject, $config ) {
+    public function plgSystemAutofbook( $subject, $config ) {
         parent::__construct( $subject, $config );
         $language = JFactory::getLanguage();
         $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, 'en-GB', true);
@@ -148,20 +148,20 @@ class plgSystemAutofbook extends JPlugin {
         return;
     }
     
-    /**
-     * Called after saving articles
-     * 
-     * @param type $article
-     * @param type $isNew
-     * @return void
-     * @since 1.5
-     */
-    public function onAfterContentSave( &$article, $isNew ) {
-       $this->inBackend = true;
-        $this->prepareToPost($article);
-        $this->postArticleToFB();
-        return;
-    }
+//    /**
+//     * Called after saving articles
+//     * 
+//     * @param type $article
+//     * @param type $isNew
+//     * @return void
+//     * @since 1.5
+//     */
+//    public function onAfterContentSave( &$article, $isNew ) {
+//       $this->inBackend = true;
+//        $this->prepareToPost($article);
+//        $this->postArticleToFB();
+//        return;
+//    }
 
     public function onAfterK2Save(&$article, $isNew){
         $this->inBackend = true;
@@ -169,20 +169,20 @@ class plgSystemAutofbook extends JPlugin {
         $this->postArticleToFB();
         return;
     }
-    /**
-     * Called when articles are viewed in the frontend.
-     * @param type $article
-     * @param type $params
-     * @param type $limitstart
-     * @return void
-     * @since 1.5
-     */
-    function onAfterDisplayContent( & $article, & $params, $limitstart=0) {
-        $this->inBackend = false;
-        $this->prepareToPost($article);
-        $this->postArticleToFB();
-        return;
-    }
+//    /**
+//     * Called when articles are viewed in the frontend.
+//     * @param type $article
+//     * @param type $params
+//     * @param type $limitstart
+//     * @return void
+//     * @since 1.5
+//     */
+//    function onAfterDisplayContent( & $article, & $params, $limitstart=0) {
+//        $this->inBackend = false;
+//        $this->prepareToPost($article);
+//        $this->postArticleToFB();
+//        return;
+//    }
     
     /**
      * Called when articles are viewed in the frontend
@@ -192,26 +192,26 @@ class plgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */
-    function onContentAfterDisplay( $context, $article, &$params, $limitstart=0) {
+    function onContentAfterDisplay( $context, &$article, &$params, $limitstart=0) {
         $this->inBackend = false;
         $this->prepareToPost($article);
         $this->postArticleToFB();
         return;
     }
   
-    /**
-     * Called in the frontend before the articles are rendered
-     * @param type $article
-     * @param type $params
-     * @param type $limitstart
-     * @return void
-     * @since 1.5
-     */
-    function onPrepareContent(  &$article, &$params, $limitstart=0 ) {
-        $this->prepareToPost($article);
-        $this->insertOGTags($article);
-        return;
-    }
+//    /**
+//     * Called in the frontend before the articles are rendered
+//     * @param type $article
+//     * @param type $params
+//     * @param type $limitstart
+//     * @return void
+//     * @since 1.5
+//     */
+//    function onPrepareContent(  &$article, &$params, $limitstart=0 ) {
+//        $this->prepareToPost($article);
+//        $this->insertOGTags($article);
+//        return;
+//    }
     /**
      * Called in the frontend before the articles are rendered
      * @param type $context
@@ -221,7 +221,8 @@ class plgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */    
-    function onContentPrepare(  $context, &$article, &$params, $page=0 ) {
+    function onContentPrepare( $context, &$article, &$params, $page=0 ) {
+        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $isPrepared = $this->prepareToPost($article);
         if($isPrepared){
             $this->insertOGTags($article);
