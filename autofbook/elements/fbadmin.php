@@ -63,7 +63,7 @@ class fbAdmin{
      */
     static function loaderImage($id){
         $imgHTML = '<span id="'.$id.'_loader" class="readonly"><img src="'. JUri::root() . fbAdmin::IMAGE_PATH .'ajax-loader.gif" width="16" height="11"></span>';
-        return $imgHTML;
+        return ;
     }
     
     /**
