@@ -98,8 +98,8 @@ class PlgSystemAutofbook extends JPlugin {
             'inclOrExcl'            =>      $this->params->def('incl_excl')
         ); 
         $this->classes = array(
-            'jArticle' => array(
-                'name'=>'jArticle',
+            'afbJArticle' => array(
+                'name'=>'afbJArticle',
                 'file'=>'jArticle.php'
             ),
             'FBookClass' => array(
@@ -120,8 +120,8 @@ class PlgSystemAutofbook extends JPlugin {
             )
         );
         $this->jArticleClassNames = array(
-            'com_article'       =>  'jArticle',
-            'com_content'       =>  'jArticle',
+            'com_article'       =>  'afbJArticle',
+            'com_content'       =>  'afbJArticle',
             'com_k2'            =>  'k2Article',
             'com_zoo'           =>  'zooArticle',
             'com_virtuemart'    =>  'vmArticle'
@@ -454,8 +454,12 @@ class PlgSystemAutofbook extends JPlugin {
             $this->showWarning($msg);
             return;
         }
-        $app = &JFactory::getApplication();
-        $app->enqueueMessage( $msg, $messageType);
+        if($messageType == ""){
+            $app = JFactory::getApplication()->enqueueMessage( $msg);
+        }else{
+            $app = JFactory::getApplication()->enqueueMessage( $msg, $messageType);
+        }
+        
     }
     
     public function showNotice($msg, $errorCode=0) {

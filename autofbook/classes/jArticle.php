@@ -12,7 +12,7 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-class jArticle {
+class afbJArticle {
     var $articleObj;
     
     public function __construct($article) {
@@ -356,7 +356,7 @@ class jArticle {
 /**
  * For K2 items
  */
-class k2Article extends jArticle{
+class k2Article extends afbJArticle{
     public function __construct($article) {
         parent::__construct($article);
         $tempClass->category_title = $this->categoryTitle($article);
@@ -467,7 +467,7 @@ class k2Article extends jArticle{
 /**
  * For Zoo articles
  */
-class zooArticle extends jArticle{
+class zooArticle extends afbJArticle{
     public function __construct($article) {
         parent::__construct($article);
     }
@@ -476,7 +476,7 @@ class zooArticle extends jArticle{
 /**
  * For VirtueMart
  */
-class vmArticle extends jArticle{
+class vmArticle extends afbJArticle{
     
     var $productImage;
     
