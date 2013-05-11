@@ -38,7 +38,7 @@ class fbAdmin{
      * Adds the general JS to the Document header
      */
     static function addJsGeneral(){
-        $document =& JFactory::getDocument();
+        $document = JFactory::getDocument();
         $document->addScript( JUri::root() . fbAdmin::JS_PATH . fbAdmin::FB_ADMIN_JS);
     }
     
@@ -70,7 +70,7 @@ class fbAdmin{
      * Adds general JS to the document header
      */
     static function addJs16(){
-        $document =& JFactory::getDocument();
+        $document = JFactory::getDocument();
         $document->addScript( JUri::root() . fbAdmin::JS_PATH . fbAdmin::ELEMENTS_JS);
     }
     
@@ -78,7 +78,7 @@ class fbAdmin{
      * Inserts translated strings to the JS of the document
      */
     static function addTranslationJS(){
-        $document =& JFactory::getDocument();
+        $document = JFactory::getDocument();
         $jsTranslationStrings = 'var PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_SUCCESS').'";';
         $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_FAILURE').'";';
         $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED').'"';
