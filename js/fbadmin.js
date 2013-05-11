@@ -1,7 +1,18 @@
+/**
+* MooTools script for retrieving info about the authorised admin
+*
+* @version  1.2
+* @author Daniel Eliasson - joomla at stilero.com
+* @copyright  (C) 2012-maj-20 Stilero Webdesign http://www.stilero.com
+* @category MooToolsScript
+* @license    GPLv2
+*/
 window.addEvent('domready', function(){
     
+    /**
+     * Method for handling the response and setting the admin name
+     */
     var handleResponse = function(response){
-        //checkResponse(response);
         if(response.name == 'undefined'){
             var errormsg = '(' + response.code + ')' +
                 response.type + '\n' +
@@ -12,11 +23,17 @@ window.addEvent('domready', function(){
         }
     };
     
+    /**
+     * Method for displaing a loader animation
+     */
     var showLoader = function(){
         var adminElementHTML = $(fbAdminElement).get('html');
         adminElementHTML += '<img src="">';
     }
     
+    /**
+     * Method for debugging the response
+     */
     var evalResponse = function(response){
         var resAsText = 'response: ';
         $each(response, function(value, key){
@@ -30,6 +47,9 @@ window.addEvent('domready', function(){
         alert(resAsText);
     };
     
+    /**
+     * AJAX method for retrieving info about the admin
+     */
     var requestAdmin = function(){
         if($(accessTokenElement).value == ''){
             $(fbAdminElement).set('text', PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED);
@@ -57,8 +77,9 @@ window.addEvent('domready', function(){
         adminRequest.cancel().send();
     };
     
-    
-        
+    /**
+     * Event listeners
+     */    
     $(accessTokenElement).addEvent('change', function(){
         requestAdmin();
     });
