@@ -1,3 +1,12 @@
+/**
+* MooTools script for authorising with Facebook
+*
+* @version  1.2
+* @author Daniel Eliasson - joomla at stilero.com
+* @copyright  (C) 2012-maj-20 Stilero Webdesign http://www.stilero.com
+* @category MooToolsScript
+* @license    GPLv2
+*/
 window.addEvent('domready', function(){
     var appID = $(appIdElement).value;
     var appSecret = $(appSecretElement).value;
@@ -6,6 +15,9 @@ window.addEvent('domready', function(){
     var authElmnt = $(authorizeElement).get('html');
     var loader = '<span class="ajaxloader-blue"></span>';
         
+    /**
+     * Method for handling the looks and function of the Connect button
+     */    
     var setButtonHref = function(){
         var link = 'https://www.facebook.com/dialog/oauth' + 
             '?client_id=' + appID +
@@ -20,6 +32,10 @@ window.addEvent('domready', function(){
             $(authorizeElement).set('class', 'fbdisconnect');
         }
     };
+    
+    /**
+     * Method for clearing and resetting authorisation
+     */
     var clearAuthorization = function(){
         $(authCodeElement).value = '';
         $(fbPageIdElement).value = '';
@@ -29,15 +45,9 @@ window.addEvent('domready', function(){
         $(accessTokenElement).fireEvent('change');
     };
     
-    $(authorizeElement).addEvent('click', function(e){
-        if($(accessTokenElement).value != ''){
-            e.preventDefault();
-            clearAuthorization();
-        }else{
-            showLoader();
-        }
-    });
-    
+    /**
+     * Method for displaying the connect button when all fileds are entered
+     */
     var displayButton = function(){
         setButtonHref();
         if(appID == '' || appSecret == '' || redirectURI == ''){
@@ -50,10 +60,16 @@ window.addEvent('domready', function(){
         }
     };
     
+    /**
+     * Method for showing the loader animation
+     */
     var showLoader = function(){
         $(authorizeElement).set('html', authElmnt + loader);   
     };
     
+    /**
+     * Method for hiding the loader animation
+     */
     var hideLoader = function(){
         $(authorizeElement).set('html', authElmnt);   
     };
@@ -82,8 +98,6 @@ window.addEvent('domready', function(){
     
     var requestAccessToken = function(){
         authCode = $(authCodeElement).value;
-        
-
         var reqUrl = helpersURI + 'authorizer.php';
         var myRequest = new Request.JSON({
             url: reqUrl,
@@ -110,7 +124,10 @@ window.addEvent('domready', function(){
     };
     
     displayButton();
-
+    
+    /**
+     * Event Listeners
+     */
     $(appIdElement).addEvent('keyup', function(){
         appID = $(appIdElement).value;
         displayButton();
@@ -126,4 +143,12 @@ window.addEvent('domready', function(){
         requestAccessToken();
     });
         
+    $(authorizeElement).addEvent('click', function(e){
+        if($(accessTokenElement).value != ''){
+            e.preventDefault();
+            clearAuthorization();
+        }else{
+            showLoader();
+        }
+    });
 });
