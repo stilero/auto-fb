@@ -2,7 +2,7 @@
 /**
 * Description of AutoFBook4
 *
-* @version  1.1
+* @version  1.2
 * @author Daniel Eliasson - joomla at stilero.com
 * @copyright  (C) 2012-jul-29 Stilero Webdesign http://www.stilero.com
 * @category Custom Form field
@@ -14,9 +14,15 @@ defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.helper');
 
-
-class k2categories{
+/**
+ * A Class for retrieving K2 categories
+ */
+class afbK2Categories{
     
+    /**
+     * Checks if K2 is installed
+     * @return boolean True if K2 is installed
+     */
     static function isK2Installed(){
         // Ignore warnings because component may not be installed
         $warnHandlers = JERROR::getErrorHandling( E_WARNING );
@@ -33,11 +39,15 @@ class k2categories{
         return true;
     }
     
+    /**
+     * Get all the K2 Categories
+     * @return Array List of categories
+     */
     static function getCategories(){
         if(!self::isK2Installed()){
             return;
         }
-        $db =& JFactory::getDBO();
+        $db = JFactory::getDBO();
         $query = $db->getQuery(true);
         $query->select('id, name');
         $query->from($db->quoteName('#__k2_categories'));
@@ -48,7 +58,14 @@ class k2categories{
         return $result;
     }
     
-    static function selectList($id, $name, $selectedIDs, $isJ15=FALSE){
+    /**
+     * Returns the HTML code for the select list
+     * @param integer $id
+     * @param string $name
+     * @param Array $selectedIDs
+     * @return string HTML code for the select list
+     */
+    static function selectList($id, $name, $selectedIDs){
         $cats = self::getCategories();
         if(!$cats){
             return '';
@@ -74,30 +91,41 @@ class k2categories{
     }
 }
 
-    class JFormFieldK2categories extends JFormField {
-        protected $type = 'k2categories';
+/**
+ * Class for custom form elements
+ */
+class JFormFieldK2categories extends JFormField {
+    protected $type = 'k2categories';
 
-        protected function getInput(){
-            $data = null;
-            foreach ((Array)$this->form as $key => $val) {
-                if($val instanceof JRegistry){
-                $data = &$val;
-                break;
-                }
+    /**
+     * Returns the HTML code for the input
+     * @return string HTML code for the list
+     */
+    protected function getInput(){
+        $data = null;
+        foreach ((Array)$this->form as $key => $val) {
+            if($val instanceof JRegistry){
+            $data = &$val;
+            break;
             }
-            $selectedOptions = '';
-            $data = $data->toArray();
-            if(isset($data['params']['k2cats'])){
-                $selectedOptions = $data['params']['k2cats'];
-            }
-            return k2categories::selectList($this->id, $this->name, $selectedOptions);
         }
-        
-        protected function getLabel(){
-            $toolTip = JText::_($this->element['description']);
-            $text = JText::_($this->element['label']);
-            $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$text.'::'.$toolTip.'">'.$text.'</label>';
-            return $labelHTML;
+        $selectedOptions = '';
+        $data = $data->toArray();
+        if(isset($data['params']['k2cats'])){
+            $selectedOptions = $data['params']['k2cats'];
         }
-        
-    }//End Class
+        return afbK2Categories::selectList($this->id, $this->name, $selectedOptions);
+    }
+    
+    /**
+     * Returns the HTML for the label
+     * @return string HTML
+     */
+    protected function getLabel(){
+        $toolTip = JText::_($this->element['description']);
+        $text = JText::_($this->element['label']);
+        $labelHTML = '<label id="'.$this->id.'-lbl" for="'.$this->id.'" class="hasTip" title="'.$text.'::'.$toolTip.'">'.$text.'</label>';
+        return $labelHTML;
+    }
+
+}//End Class
