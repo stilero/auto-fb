@@ -15,16 +15,17 @@ defined('_JEXEC') or die('Restricted access');
 class fbauthorize{
     
     const ASSETS_PATH = 'media/plg_autofbook/';
-    const IMG_PATH = 'images/';
-    const JS_PATH = 'js/';
+    const IMG_PATH = 'media/plg_autofbook/images/';
+    const JS_PATH = 'media/plg_autofbook/js/';
     const CATCHER_URI = 'plugins/system/autofbook/autofbook/helpers/catcherJ16.php';
     const HELPERS_URI = 'plugins/system/autofbook/autofbook/helpers/';
-    const ELEMENTS_SCRIPT = 'j16Elements.js';
+    const GENERAL_JS = 'authorize.js';
+    const ELEMENTS_JS = 'j16Elements.js';
     const CONNECTBUTTON_IMG = 'connect-button.png';
     
     static function addJsGeneral(){
         $document = JFactory::getDocument();
-        $scriptURL = JUri::root() . fbauthorize::ASSETS_PATH . fbauthorize::JS_PATH;
+        $scriptURL = JUri::root() . fbauthorize::JS_PATH . fbauthorize::GENERAL_JS;
         $document->addScript($scriptURL);
     }
     
@@ -38,7 +39,7 @@ $jsVars = <<<EOD
 EOD;
     $document = JFactory::getDocument();
     $document->addScriptDeclaration($jsVars);
-    $document->addScript( JUri::root() . fbauthorize::ASSETS_PATH . fbauthorize::JS_PATH . fbauthorize::ELEMENTS_SCRIPT );
+    $document->addScript( JUri::root() . fbauthorize::JS_PATH . fbauthorize::ELEMENTS_JS );
 }
     
     /**
@@ -47,7 +48,7 @@ EOD;
      * @return string HTML
      */
     static function connectButton($id){
-        $buttonImage = JUri::root() . fbauthorize::ASSETS_PATH . fbauthorize::CONNECTBUTTON_IMG;
+        $buttonImage = JUri::root() . fbauthorize::IMG_PATH . fbauthorize::CONNECTBUTTON_IMG;
         $htmlCode = 
             '<a '.
                 'id="'.$id.'" '.
@@ -71,7 +72,6 @@ EOD;
         $jsTranslationStrings .= 'var PLG_SYSTEM_AUTOFBOOK_JS_FAILURE = "'.JText::_('PLG_SYSTEM_AUTOFBOOK_JS_FAILURE').'";';
         $document->addScriptDeclaration($jsTranslationStrings);        
     }
-    
 }
 
 
