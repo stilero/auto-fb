@@ -28,7 +28,7 @@
  * along with AutoFBook.  
  * If not, see <http://www.gnu.org/licenses/>.
  */
-class FBookClass {
+class afbFBookClass {
     private $fbAppID;
     private $fbAppSecret;
     private $fbOauthAccessToken;

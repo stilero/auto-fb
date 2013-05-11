@@ -7,7 +7,7 @@
     $config = array(
         'redirectURI'   =>  $redirectURI
     );
-    $fb = new FBookClass($appID, $appSecret, $config);
+    $fb = new afbFBookClass($appID, $appSecret, $config);
     $fb->setOauthCode($authCode);
     $response  = $fb->requestAccessTokenForApp();
     if($fb->hasErrorOccured()){

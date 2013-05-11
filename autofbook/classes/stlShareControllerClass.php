@@ -8,7 +8,7 @@
  * @license GPLv2
  * 
  */
-class stlShareControllerClass {
+class afbShareControllerClass {
 
     var $articleObject;
     var $config;

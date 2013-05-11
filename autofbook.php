@@ -78,15 +78,15 @@ class PlgSystemAutofbook extends JPlugin {
             'pluginLangPrefix'      =>      'PLG_SYSTEM_AUTOFBOOK_',
             'pluginElement'         =>      'autofbook',
             'classFolder'           =>      'autofbook'.DS.'classes',
-            'articleClass'          =>      'jArticle',
+            'articleClass'          =>      'afbJArticle',
             'articleClassFile'      =>      'jArticle.php',
-            'fbookClass'            =>      'FBookClass',
+            'fbookClass'            =>      'afbFBookClass',
             'fbookClassFile'        =>      'fbookClass.php',
-            'jfbClass'              =>      'JFBClass',
+            'jfbClass'              =>      'afbJFBClass',
             'jfbClassFile'          =>      'jfbClass.php',
-            'shareControllerClass'  =>      'stlShareControllerClass',
+            'shareControllerClass'  =>      'afbShareControllerClass',
             'shareControllerFile'   =>      'stlShareControllerClass.php',
-            'fbControllerClass'     =>      'fbControllerClass',
+            'fbControllerClass'     =>      'afbControllerClass',
             'fbControllerFile'      =>      'fbControllerClass.php',
             'fbPageID'              =>      $this->params->def('fb_page_id'),
             'categoriesToShare'     =>      $this->params->def('section_id'),
@@ -102,20 +102,20 @@ class PlgSystemAutofbook extends JPlugin {
                 'name'=>'afbJArticle',
                 'file'=>'jArticle.php'
             ),
-            'FBookClass' => array(
-                'name'=>'FBookClass',
+            'afbFBookClass' => array(
+                'name'=>'afbFBookClass',
                 'file'=>'fbookClass.php'
             ),
-            'JFBClass' => array(
-                'name'=>'JFBClass',
+            'afbJFBClass' => array(
+                'name'=>'afbJFBClass',
                 'file'=>'jfbClass.php'
             ),
-            'stlShareControllerClass' => array(
-                'name'=>'stlShareControllerClass',
+            'afbShareControllerClass' => array(
+                'name'=>'afbShareControllerClass',
                 'file'=>'stlShareControllerClass.php'
             ),
-            'fbControllerClass' => array(
-                'name'=>'fbControllerClass',
+            'afbControllerClass' => array(
+                'name'=>'afbControllerClass',
                 'file'=>'fbControllerClass.php'
             )
         );
@@ -301,7 +301,7 @@ class PlgSystemAutofbook extends JPlugin {
     
     private function setupClasses() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $this->CheckClass = new $this->classes['fbControllerClass']['name']( 
+        $this->CheckClass = new $this->classes['afbControllerClass']['name']( 
             array(
                 'fbAppID'               =>      $this->fbAppID,
                 'fbAppSecret'           =>      $this->fbAppSecret,

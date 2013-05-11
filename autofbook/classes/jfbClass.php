@@ -7,7 +7,7 @@
  * @copyright 2011-dec-22 Stilero AB
  * @license GPLv2
  */
-class JFBClass extends FBookClass{
+class afbJFBClass extends afbFBookClass{
     var $inBackend = false;
     
     function __construct($fbAppID, $fbAppSecret, $config="") {
