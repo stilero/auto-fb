@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 4.3 2012-09-18 21:31 $
+ * @version 4.4 2012-09-18 21:31 $
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
@@ -35,7 +35,7 @@ if(!defined('DS')){
 jimport('joomla.plugin.plugin');
 
 // Initiate class to hold plugin events
-class plgSystemAutofbook extends JPlugin {
+class PlgSystemAutofbook extends JPlugin {
     var $config;
     var $inBackend;
     var $error = false;
@@ -64,8 +64,8 @@ class plgSystemAutofbook extends JPlugin {
     var $authorization_response_type = "response_type=token";
     var $ogTagsAdded = false;
 
-    public function plgSystemAutofbook( $subject, $config ) {
-        parent::__construct( $subject, $config );
+    public function __construct(&$subject, $config) {
+        parent::__construct($subject, $config);
         $language = JFactory::getLanguage();
         $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, 'en-GB', true);
         $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, null, true);
@@ -140,7 +140,7 @@ class plgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */
-    public function onContentAfterSave($context, &$article, $isNew) {
+    public function onContentAfterSave($context, $article, $isNew) {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $this->inBackend = true;
         $this->prepareToPost($article);

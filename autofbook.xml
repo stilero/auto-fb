@@ -58,8 +58,8 @@
                 <field name="register" type="register" label="" />
                 <field name="fb_app_id" type="text" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPID" description="PLG_SYSTEM_AUTOFBOOK_APPID_DESC"/>
                 <field name="fb_app_secret" type="password" required="true" default="" label="PLG_SYSTEM_AUTOFBOOK_APPSECRET" description="PLG_SYSTEM_AUTOFBOOK_APPSECRET_DESC"/>
-                <field name="auth_token" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
-                <field name="auth_code" type="text"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
+                <field name="auth_token" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
+                <field name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
                 <field name="authorize" type="authorize" label="" />
                 <field name="fbadmin" type="fbadmin" label="" />
                 <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>

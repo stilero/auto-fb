@@ -67,9 +67,20 @@ class jArticle {
     }
     
     public function imagesInContent($article){
-        $content = $article->text;
-        $content = $content == '' ? $article->fulltext : $content;
-        $content = $content == '' ? $article->introtext : $content;
+        $content = '';
+        $fulltext = '';
+        $introtext = '';
+        if(isset($article->text)){
+            $content = $article->text;
+        }
+        if(isset($article->fulltext)){
+            $fulltext = $article->fulltext;
+        }
+        if(isset($article->introtext)){
+            $introtext = $article->introtext;
+        }
+        $content = $content == '' ? $fulltext : $content;
+        $content = $content == '' ? $introtext : $content;
         //if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > content='.$content );
         if( ($content == '') || (!class_exists('DOMDocument')) ){
             return;
@@ -90,9 +101,20 @@ class jArticle {
     }
     
     public function firstImageInContent($article){
-        $content = $article->text;
-        $content = $content == '' ? $article->fulltext : $content;
-        $content = $content == '' ? $article->introtext : $content;
+        $content = '';
+        $fulltext = '';
+        $introtext = '';
+        if(isset($article->text)){
+            $content = $article->text;
+        }
+        if(isset($article->fulltext)){
+            $fulltext = $article->fulltext;
+        }
+        if(isset($article->introtext)){
+            $introtext = $article->introtext;
+        }
+        $content = $content == '' ? $fulltext : $content;
+        $content = $content == '' ? $introtext : $content;
         if( $content == ''){
             return;
         }
@@ -134,8 +156,12 @@ class jArticle {
     }
     
     public function description($article){
-        $descText = $article->text!="" ? $article->text : '';
-        $description = $article->text!="" ? $article->text : '';
+        $descText = '';
+        $description = '';
+        if(isset($article->text) && $article->text != ""){
+            $descText = $article->text;
+            $description = $article->text;
+        }
         if(isset($article->introtext) && $article->introtext!=""){
             $descText = $article->introtext;
         }elseif (isset($article->metadesc) && $article->metadesc!="" ) {
@@ -236,11 +262,11 @@ class jArticle {
         jimport( 'joomla.filter.output' );
         $alias = $article->alias;
         if(empty($alias)) {
-            $db =& JFactory::getDBO();
-            $query = 
-                'SELECT a.alias FROM '
-                .$db->nameQuote('#__content').' AS '.$db->nameQuote('a').
-                ' WHERE a.id='.$db->quote($article->id);
+            $db = JFactory::getDBO();
+            $query = $db->getQuery(TRUE);
+            $query->select('alias');
+            $query->from('#__content');
+            $query->where('id='.(int)$article->id);
             $db->setQuery($query);
             $result = $db->loadObject();
             $alias = empty($result->alias) ? $article->title : $result->alias;
@@ -251,11 +277,11 @@ class jArticle {
     
     private function categoryAlias($article){
         jimport( 'joomla.filter.output' );
-        $db =& JFactory::getDBO();
-        $query = 
-            'SELECT c.alias FROM '
-            .$db->nameQuote('#__categories').' AS '.$db->nameQuote('c').
-            ' WHERE c.id='.$db->quote($article->catid);
+        $db = JFactory::getDBO();
+        $query = $db->getQuery(TRUE);
+        $query->select('alias');
+        $query->from('#__categories');
+        $query->where('id = '.(int)$article->catid);
         $db->setQuery($query);
         $result = $db->loadObject();
         $alias = $result->alias;
@@ -285,6 +311,8 @@ class jArticle {
             return '1.7';
         }else if( version_compare(JVERSION,'2.5.0','ge') && version_compare(JVERSION,'3.0.0','lt') ) {
             return '2.5';
+        }else if( version_compare(JVERSION,'3.0.0','ge') && version_compare(JVERSION,'3.5.0','lt') ) {
+            return '3.0';
         }
         return '';
     }

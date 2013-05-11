@@ -1,3 +1,12 @@
+/**
+* MooTools script for retrieving pages of the admin
+*
+* @version  1.2
+* @author Daniel Eliasson - joomla at stilero.com
+* @copyright  (C) 2012-maj-20 Stilero Webdesign http://www.stilero.com
+* @category MooToolsScript
+* @license    GPLv2
+*/
 window.addEvent('domready', function(){
     var pageID = $(fbPageIdElement).value;
     var defaultSelectList = $(fbPagesElement).get('html');  
@@ -6,7 +15,6 @@ window.addEvent('domready', function(){
         if(pageID == ''){
             pageID = $(fbPagesElement).get('value');
         }
-        
         $(fbPageIdElement).value = pageID;
     };
     
@@ -59,11 +67,17 @@ window.addEvent('domready', function(){
         });
         alert(resAsText);
     };
+    
+    /**
+     * AJAX method for retrieving pages
+     */
     var requestPages = function(){
         if($(accessTokenElement).value == ''){
             $(fbPagesElement).set('html', defaultSelectList);
             return;
         }
+        // FOR DEBUGGING
+        //alert('https://graph.facebook.com/me/accounts?' + 'access_token=' + $(accessTokenElement).value + '&grant_type=manage_pages' );
         var pageRequest = new Request.JSONP({
             url: 'https://graph.facebook.com/me/accounts',
             method: 'post',
@@ -87,8 +101,9 @@ window.addEvent('domready', function(){
         pageRequest.cancel().send();
     };
     
-    
-        
+    /**
+     * Event listeners
+     */
     $(fbPagesElement).addEvent('change', function(){
         pageID = $(fbPagesElement).get('value');
         $(fbPageIdElement).value = pageID;

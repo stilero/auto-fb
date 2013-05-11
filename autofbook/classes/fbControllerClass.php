@@ -158,9 +158,10 @@ class fbControllerClass extends stlShareControllerClass{
             $tableName = '#__plugins';
         }
         $db = JFactory::getDbo();
-        $query = 'UPDATE '.$tableName.' SET '.
-                'params'.'='.$db->quote($params->toString()).
-                ' WHERE element='.$db->quote($pluginElement);
+        $query = $db->getQuery(TRUE);
+        $query->update($tableName);
+        $query->set('params'.'='.$db->quote($params->toString()));
+        $query->where('element='.$db->quote($params->toString()));
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' SQL: '.$query);
         $db->setQuery($query);
         $db->query();

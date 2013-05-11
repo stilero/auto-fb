@@ -193,24 +193,17 @@ class stlShareControllerClass {
         $delayInMinutes = ( $delayInMinutes > 60 )?60:$delayInMinutes;
         $currentDate=date("Y-m-d H:i:s");
         $db = JFactory::getDbo();
-        $dbColumn = $db->nameQuote('id');
-        $table = $db->nameQuote($this->config['shareLogTableName']);
-        $key = $db->nameQuote('date');
-//        
-//        if( $this->isJoomla16() || $this->isJoomla17() ) {
-//            $query	= $db->getQuery(true);
-//            $query->select('id');
-//            $query->from( $this->config['shareLogTableName'] );
-//            $query->where("date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')");
-//        }  elseif($this->isJoomla15()) {
-//            $query = "SELECT "
-//                .$db->nameQuote('id').
-//                " FROM ".$db->nameQuote( $this->config['shareLogTableName'] ).
-//                " WHERE date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
-//        }
-        $query = "SELECT ".$dbColumn.
-                " FROM ".$table.
-                " WHERE ".$key." > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
+//        $dbColumn = $db->nameQuote('id');
+//        $table = $db->nameQuote($this->config['shareLogTableName']);
+//        $key = $db->nameQuote('date');
+
+        $query = $db->getQuery(TRUE);
+        $query->select('id');
+        $query->from($this->config['shareLogTableName']);
+        $query->where( "date > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')" );
+//        $query = "SELECT ".$dbColumn.
+//                " FROM ".$table.
+//                " WHERE ".$key." > SUBTIME('".$currentDate."','0 0:".$delayInMinutes.":0.0')";
         $db->setQuery($query);
         $postMadeWithinDelayTime = $db->loadObject();
         if($postMadeWithinDelayTime){
@@ -227,18 +220,22 @@ class stlShareControllerClass {
             return FALSE;
         }
         $db = JFactory::getDbo();
-        $column = $db->nameQuote('id');
-        $table = $db->nameQuote($this->config['shareLogTableName']);
-        $keyArticleID = $db->nameQuote('article_id');
-        $articleID = $this->articleObject->id;
-        $valArticleID = $db->Quote($articleID);
-        $keyOption = $db->nameQuote('articlelink');
-        $valOption = $db->Quote(JRequest::getVar('option'));
-
-        $query = 'SELECT '.$column.
-                ' FROM '.$table.
-                ' WHERE '.$keyArticleID.'='.$valArticleID.
-                ' AND '.$keyOption.' = '.$valOption;
+//        $column = $db->nameQuote('id');
+//        $table = $db->nameQuote($this->config['shareLogTableName']);
+//        $keyArticleID = $db->nameQuote('article_id');
+//        $articleID = $this->articleObject->id;
+//        $valArticleID = $db->Quote($articleID);
+//        $keyOption = $db->nameQuote('articlelink');
+//        $valOption = $db->Quote(JRequest::getVar('option'));
+        $query = $db->getQuery(TRUE);
+        $query->select('id');
+        $query->from($this->config['shareLogTableName']);
+        $query->where('article_id = '.(int)$this->articleObject->id);
+        $query->where('articlelink = '.$db->quote(JRequest::getVar('option')));
+//        $query = 'SELECT '.$column.
+//                ' FROM '.$table.
+//                ' WHERE '.$keyArticleID.'='.$valArticleID.
+//                ' AND '.$keyOption.' = '.$valOption;
         $db->setQuery($query);
         $itemAlreadyPosted = $db->loadObject();
         if($itemAlreadyPosted){
@@ -301,33 +298,40 @@ class stlShareControllerClass {
     public function saveLogToDB() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $db = JFactory::getDbo();
-        $table = $db->nameQuote($this->config['shareLogTableName']);
-        $keyID = $db->nameQuote('id');
-        $keyArticleID = $db->nameQuote('article_id');
-        $keyCatID = $db->nameQuote('cat_id');
-        $keyOption = $db->nameQuote('articlelink');
-        $keyDate = $db->nameQuote('date');
-        $keyLang = $db->nameQuote('language');
-        $valArticleID = $db->quote($this->articleObject->id);
-        $valCatID = $db->quote($this->articleObject->catid);
-        $valOption = $db->quote(JRequest::getVar('option'));
-        $valDate = $db->quote(date("Y-m-d H:i:s"));
-        $valLang = $db->quote($this->articleObject->language);
-        $query = 'INSERT INTO '.$table.' ('.
-                ' '.$keyID.','.
-                ' '.$keyArticleID.','.
-                ' '.$keyCatID.','.
-                ' '.$keyOption.','.
-                ' '.$keyDate.','.
-                ' '.$keyLang.
-                ') VALUES ('.
-                ' NULL,'.
-                ' '.$valArticleID.','.
-                ' '.$valCatID.','.
-                ' '.$valOption.','.
-                ' '.$valDate.','.
-                ' '.$valLang.
-                ')';
+//        $table = $db->nameQuote($this->config['shareLogTableName']);
+//        $keyID = $db->nameQuote('id');
+//        $keyArticleID = $db->nameQuote('article_id');
+//        $keyCatID = $db->nameQuote('cat_id');
+//        $keyOption = $db->nameQuote('articlelink');
+//        $keyDate = $db->nameQuote('date');
+//        $keyLang = $db->nameQuote('language');
+//        $valArticleID = $db->quote($this->articleObject->id);
+//        $valCatID = $db->quote($this->articleObject->catid);
+//        $valOption = $db->quote(JRequest::getVar('option'));
+//        $valDate = $db->quote(date("Y-m-d H:i:s"));
+//        $valLang = $db->quote($this->articleObject->language);
+        $query = $db->getQuery(TRUE);
+        $query->insert($this->config['shareLogTableName']);
+        $query->set('article_id = '.(int)$this->articleObject->id);
+        $query->set('cat_id = '.(int)$this->articleObject->catid);
+        $query->set('articlelink = '.$db->quote(JRequest::getVar('option')));
+        $query->set('date = '.$db->quote(date("Y-m-d H:i:s")));
+        $query->set('language = '.$db->quote($this->articleObject->language));
+//        $query = 'INSERT INTO '.$table.' ('.
+//                ' '.$keyID.','.
+//                ' '.$keyArticleID.','.
+//                ' '.$keyCatID.','.
+//                ' '.$keyOption.','.
+//                ' '.$keyDate.','.
+//                ' '.$keyLang.
+//                ') VALUES ('.
+//                ' NULL,'.
+//                ' '.$valArticleID.','.
+//                ' '.$valCatID.','.
+//                ' '.$valOption.','.
+//                ' '.$valDate.','.
+//                ' '.$valLang.
+//                ')';
         $db->setQuery($query);
         return $result = $db->query($query);
     }
@@ -335,25 +339,29 @@ class stlShareControllerClass {
     public function deleteLogFromDB() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
         $db = JFactory::getDbo();
-        $table = $db->nameQuote($this->config['shareLogTableName']);
-        $keyArticleID = $db->nameQuote('article_id');
-        $articleID = $this->articleObject->id;
-        $valArticleID = $db->Quote($articleID);
-        $keyOption = $db->nameQuote('articlelink');
-        $valOption = $db->Quote(JRequest::getVar('option'));
-
-        $query = 'DELETE '.
-                ' FROM '.$table.
-                ' WHERE '.$keyArticleID.'='.$valArticleID.
-                ' AND '.$keyOption.' = '.$valOption;
-        
+//        $table = $db->nameQuote($this->config['shareLogTableName']);
+//        $keyArticleID = $db->nameQuote('article_id');
+//        $articleID = $this->articleObject->id;
+//        $valArticleID = $db->Quote($articleID);
+//        $keyOption = $db->nameQuote('articlelink');
+//        $valOption = $db->quote(JRequest::getVar('option'));
+        $query = $db->getQuery(TRUE);
+        $query->delete();
+        $query->from($this->config['shareLogTableName']);
+        $query->where('article_id = '.(int)$this->articleObject->id);
+        $query->where('articlelink = '.$db->quote(JRequest::getVar('option')));
+//        $query = 'DELETE '.
+//                ' FROM '.$table.
+//                ' WHERE '.$keyArticleID.'='.$valArticleID.
+//                ' AND '.$keyOption.' = '.$valOption;
+//        
         $db->setQuery($query);
         return $result = $db->query($query);
     }
 
     public function tableExists() {
         if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $dbObject		=& JFactory::getDbo();
+        $dbObject = JFactory::getDbo();
         $query = "DESC `".$this->config['shareLogTableName']."`";
         $dbObject->setQuery($query);
         $tableFound = $dbObject->query();
