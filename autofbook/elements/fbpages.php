@@ -39,7 +39,7 @@ class fbPages{
     static function pagesList($id, $name=''){
         $htmlCode =
         '<select id="'.$id.'" name="'.$name.'">'.
-        '<option selected="selected" value="me">'.JText::_('PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_PERSONAL').'</option>'.
+        //'<option selected="selected" value="me">'.JText::_('PLG_SYSTEM_AUTOFBOOK_ELEMENT_FBPAGES_PERSONAL').'</option>'.
         '</select>';
        
         return $htmlCode;

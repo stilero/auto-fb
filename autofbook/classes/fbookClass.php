@@ -2,7 +2,7 @@
 /**
  * A Class for communication with Facebook
  *
- * @version $Id: fbookClass.php 28 2012-05-26 15:49:51Z webbochsant@gmail.com $
+ * @version 1.28
  * @author danieleliasson Stilero AB - http://www.stilero.com
  * @copyright 2011-dec-22 Stilero AB
  * @license GPLv2
@@ -57,7 +57,7 @@ class afbFBookClass {
                 'fbOauthToken'         =>  '',
                 'fbPageID'              =>  '',
                 'authTokenURL'          =>  'https://www.facebook.com/dialog/oauth',
-                'authScope'             =>  'publish_stream,share_item,offline_access,manage_pages',
+                'authScope'             =>  'publish_stream,share_item,offline_access,manage_pages,publish_actions',
                 'authResponseType'      =>  'response_type=token',
                 'accessTokenURL'        =>  'https://graph.facebook.com/me/accounts',
                 'graphAccessToken'      =>  'https://graph.facebook.com/oauth/access_token',
@@ -103,7 +103,7 @@ class afbFBookClass {
             return;
             $this->setDebugInfo('error before post link');
         }
-        $isPageQuery = ($this->config['fbPageID'] != "") ? TRUE : FALSE;
+        $isPageQuery = ($this->config['fbPageID']) ? TRUE : FALSE;
         $postvars = array( 
             'access_token'  =>  $this->getOauthAccessToken($isPageQuery),
             'method'        =>  'post',
@@ -271,7 +271,7 @@ class afbFBookClass {
         $graphURL = $this->config['accessTokenURL'];
         $postVars = array(
             'access_token' =>  $this->fbOauthAccessToken,
-            'grant_type' => 'manage_pages'
+            'grant_type' => 'manage_pages,publish_actions'
         );
         $tokenURL = $graphURL ."?". http_build_query($postVars);
         $response = $this->query($tokenURL, $postVars, FALSE, $header);

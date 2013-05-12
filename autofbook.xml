@@ -62,6 +62,7 @@
                 <field name="auth_code" type="password"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHCODE" description="PLG_SYSTEM_AUTOFBOOK_AUTHCODE_DESC"/>
                 <field name="authorize" type="authorize" label="" />
                 <field name="fbadmin" type="fbadmin" label="" />
+                <field name="fbadmin_id" type="hidden" />
                 <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
                 <field name="fb_page_id" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
                 <field name="fbpage_auth_token" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>

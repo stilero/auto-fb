@@ -20,6 +20,10 @@ window.addEvent('domready', function(){
                 alert(errormsg);
         }else{
             $(fbAdminElement).set('text', response.name);
+            $(fbAdminIDElement).set('text', response.id);
+            var options = $(fbPagesElement).get('html');
+            options = options + '<option value="' + response.id + '">' + response.name + ' Timeline</option>';
+            $(fbPagesElement).set('html', options);
         }
     };
     
@@ -55,6 +59,8 @@ window.addEvent('domready', function(){
             $(fbAdminElement).set('text', PLG_SYSTEM_AUTOFBOOK_JS_NOT_AUTHORIZED);
             return;
         }
+        //FOR DEBUGGING
+        //alert('https://graph.facebook.com/me?access_token=' + $(accessTokenElement).value);
         var adminRequest = new Request.JSONP({
             url: 'https://graph.facebook.com/me',
             method: 'post',
