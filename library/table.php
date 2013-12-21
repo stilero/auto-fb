@@ -3,7 +3,7 @@
  * TwitterTweet Table class handles creation and updating of tables related to 
  * social share extensions
  *
- * @version  1.1
+ * @version  1.2
  * @package Stilero
  * @since J2.5
  * @subpackage plg_twittertweet
@@ -90,7 +90,7 @@ class StileroAFBTable{
         //$data->date = date("Y-m-d H:i:s");
         $data->language = $lang;
         $db = JFactory::getDbo();
-        $db->insertObject( $this->_table , $data, id);
+        $db->insertObject( $this->_table , $data, $id);
     }
     
     /**
