@@ -37,7 +37,7 @@ class StileroFBOpengraph{
         $title = htmlentities(strip_tags( $this->article->title), ENT_QUOTES, "UTF-8");
         $image = $this->article->image;
         $description = $this->article->description;
-        $siteName = $config->getValue( 'config.sitename' );
+        $siteName = $config->get( 'config.sitename' );
         $language = JFactory::getLanguage();
         $locale = str_replace( "-", "_", $language->getTag() );
         $published = date('c', strtotime( $this->article->publish_up) );
