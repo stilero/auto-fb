@@ -22,7 +22,8 @@ window.addEvent('domready', function(){
             $(fbAdminElement).set('text', response.name);
             $(fbAdminIDElement).set('text', response.id);
             var options = $(fbPagesElement).get('html');
-            options = options + '<option value="' + response.id + '">' + response.name + ' Timeline</option>';
+            //options = options + '<option value="' + response.id + '">' + response.name + ' Timeline</option>';
+            options = options + '<option value="">' + response.name + ' Timeline</option>';
             $(fbPagesElement).set('html', options);
         }
     };

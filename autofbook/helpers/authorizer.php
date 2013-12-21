@@ -1,34 +1,34 @@
 <?php
-    require_once '../classes/fbookClass.php';
-    $appID = filter_var($_POST['client_id'], FILTER_SANITIZE_NUMBER_INT);
-    $appSecret = filter_var($_POST['client_secret'], FILTER_SANITIZE_STRING);
-    $authCode = filter_var($_POST['code'], FILTER_SANITIZE_STRING);
-    $redirectURI = filter_var($_POST['redirect_uri'], FILTER_SANITIZE_URL);
-    $config = array(
-        'redirectURI'   =>  $redirectURI
-    );
-    $fb = new afbFBookClass($appID, $appSecret, $config);
-    $fb->setOauthCode($authCode);
-    $response  = $fb->requestAccessTokenForApp();
-    if($fb->hasErrorOccured()){
-        $errCode = $fb->getErrorCode();
-        $errDesc = $fb->getErrorMessage();
-        $response = <<<EOD
-{
-   "error": {
-      "code": "$errCode",
-      "type": "OAuthException",
-      "message": "$errDesc"
-   }
-}
-EOD;
-    } else{
-        $parsedResp = parse_str($response);
-        $response = <<<EOD
-{
-   "access_token": "$access_token"
-}
-EOD;
+    // no direct access
+    define('_JEXEC', 1); 
+    if(!defined('DS')){
+        define('DS', DIRECTORY_SEPARATOR);
     }
-    print $response;
+    define('PATH_FBLIBRARY_FBOAUTH', '..'.DS.'..'.DS.'library'.DS.'fblibrary'.DS.'fboauth'.DS);
+    define('PATH_FBLIBRARY_OAUTH', '..'.DS.'..'.DS.'library'.DS.'fblibrary'.DS.'oauth'.DS);
+    require_once PATH_FBLIBRARY_OAUTH.'communicator.php';
+    require_once PATH_FBLIBRARY_OAUTH.'client.php';
+    require_once PATH_FBLIBRARY_FBOAUTH.'accesstoken.php';
+    require_once PATH_FBLIBRARY_FBOAUTH.'code.php';
+    require_once PATH_FBLIBRARY_FBOAUTH.'app.php';
+    require_once PATH_FBLIBRARY_FBOAUTH.'jerror.php';
+    require_once PATH_FBLIBRARY_FBOAUTH.'response.php';
+    
+    
+    $appID = StileroFBOauthCode::sanitizeInt($_POST['client_id']);
+    $appSecret = StileroFBOauthCode::sanitizeString($_POST['client_secret']);
+    $code = StileroFBOauthCode::sanitizeString($_POST['code']);
+    $redirectURI = StileroFBOauthCode::sanitizeUrl($_POST['redirect_uri']);
+    $FBApp = new StileroFBOauthApp($appID, $appSecret);
+    $AccessToken = new StileroFBOauthAccesstoken($FBApp);
+    $json = $AccessToken->getTokenFromCode($code, $redirectURI);
+    $response = StileroFBOauthResponse::handle($json);
+    $AccessToken->tokenFromResponse($response);
+    
+        $token = <<<EOD
+{
+   "access_token": "$AccessToken->token"
+}
+EOD;
+    print $token;
 ?>

@@ -23,9 +23,34 @@ class StileroFBOauthCode{
      * @param string $string
      * @return string cleaned string
      */
-    public static function clean($string){
+    public static function sanitizeString($string){
         $cleaned = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $string);
         $cleaned = ltrim($cleaned, '.');
+        $cleaned = filter_var($string, FILTER_SANITIZE_STRING);
+        return $cleaned;
+    }
+    
+    /**
+     * Cleans ints and strips out unwanted characters
+     * @param string $string
+     * @return string cleaned string
+     */
+    public static function sanitizeInt($string){
+        $cleaned = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $string);
+        $cleaned = ltrim($cleaned, '.');
+        $cleaned = filter_var($string, FILTER_SANITIZE_NUMBER_INT);
+        return $cleaned;
+    }
+    
+    /**
+     * Cleans urls and strips out unwanted characters
+     * @param string $string
+     * @return string cleaned string
+     */
+    public static function sanitizeUrl($string){
+        $cleaned = (string) preg_replace('/[^A-Z0-9_\.-]/i', '', $string);
+        $cleaned = ltrim($cleaned, '.');
+        $cleaned = filter_var($string, FILTER_SANITIZE_URL);
         return $cleaned;
     }
     
@@ -34,7 +59,7 @@ class StileroFBOauthCode{
      */
     public function fetchCode(){
         if(isset($_GET['code'])){
-            $cleanedCode = self::clean($_GET['code']);
+            $cleanedCode = self::sanitizeString($_GET['code']);
             $this->code = $cleanedCode;
         }
     }
@@ -49,5 +74,13 @@ class StileroFBOauthCode{
         }else{
             return false;
         }
+    }
+    
+    /**
+     * Sets code to the class
+     * @param string $code
+     */
+    public function setCode($code){
+        $this->code = self::sanitizeString($code);
     }
 }

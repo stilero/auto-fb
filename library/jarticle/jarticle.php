@@ -46,7 +46,7 @@ class StileroAFBJarticle {
         $tempClass->url = $this->url($article);
         $tempClass->tags = $this->tags($article);
         $tempClass->component = JRequest::getCmd('option');
-        $tempClass->lang = lang();
+        $tempClass->lang = $this->lang();
         $this->Article = $tempClass;
     }
     
@@ -79,13 +79,13 @@ class StileroAFBJarticle {
      */
     public function description($article){
         $description = '';
-        var_dump($article);exit;
         if(isset($article->text)){
             $description = $article->text;
         }
         if(isset($article->introtext) && $article->introtext!=""){
             $description = $article->introtext;
-        }elseif (isset($article->metadesc) && $article->metadesc!="" ) {
+        }
+        if (isset($article->metadesc) && $article->metadesc!="" ) {
             $description = $article->metadesc;
         }
         $linebreaks = array("\n", "\r", "\"", "'");
