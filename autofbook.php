@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 5.1 2013-12-22
+ * @version 5.2 2013-12-22
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
@@ -158,7 +158,7 @@ class PlgSystemAutofbook extends JPlugin {
         }else{
             $message = JText::_(self::LANG_PREFIX.'FAIL');
         }
-        $this->_showMessage($message);
+        $this->showMessage($message);
     }
     
     /**
@@ -187,8 +187,8 @@ class PlgSystemAutofbook extends JPlugin {
      * @param string $message The message to display
      * @param string $type The type of message
      */
-    protected function _showMessage($message, $type='message'){
-        $translatedMessage = JText::_(self::LANG_PREFIX.$message);
+    protected function showMessage($message, $type='message'){
+        $translatedMessage = JText::_($message);
         if($this->_isBackend){
             StileroAFBMessageHelper::show($translatedMessage, $type);
         }
