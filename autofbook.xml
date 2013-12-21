@@ -70,19 +70,7 @@
                 <field name="fb_pages" type="fbpages"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
                 <field name="fb_page_id" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_PAGEID" description="PLG_SYSTEM_AUTOFBOOK_PAGEID_DESC"/>
                 <field name="fbpage_auth_token" type="hidden"  default="" label="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN" description="PLG_SYSTEM_AUTOFBOOK_AUTHTOKEN_DESC"/>
-                <field name="fb_post_as_admin" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN" description="PLG_SYSTEM_AUTOFBOOK_POSTASADMIN_DESC">
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                </field>
-                <field name="fb_post_type" type="list" default="0" label="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE" description="PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_DESC">
-                        <option value="0">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_LINK</option>
-                        <option value="1">PLG_SYSTEM_AUTOFBOOK_POST_ITEM_TYPE_MESSAGE</option>
-                </field>	
                 <field name="delay" type="text"  default="15" label="PLG_SYSTEM_AUTOFBOOK_DELAYTIME" description="PLG_SYSTEM_AUTOFBOOK_DELAYTIME_DESC"/>
-                <field name="pingmessages" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGES" description="PLG_SYSTEM_AUTOFBOOK_PARAMPINGMESSAGESDESC">
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                </field>
                 <field name="add_ogtags" type="radio" default="1" label="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS" description="PLG_SYSTEM_AUTOFBOOK_ADD_OGTAGS_DESC">
                         <option value="1">Yes</option>
                         <option value="0">No</option>

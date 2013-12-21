@@ -15,8 +15,21 @@
 defined('_JEXEC') or die('Restricted access'); 
 
 class StileroFBOpengraph{
+    /**
+     * Flag to set if tags are added
+     * @var boolean 
+     */
     protected $isTagsAdded;
+    /**
+     * Article object retrieved from JArticle Class
+     * @var stdClass  
+     */
     protected $article;
+    /**
+     * Src url to the default image
+     * @var string 
+     */
+    protected $defaultImageSrc;
     
     /**
      * Class for inserting OG meta tags in HTML code
@@ -36,6 +49,9 @@ class StileroFBOpengraph{
         $config = JFactory::getConfig();
         $title = htmlentities(strip_tags( $this->article->title), ENT_QUOTES, "UTF-8");
         $image = $this->article->image;
+        if($image == '' && isset($this->defaultImageSrc)){
+            $image = $this->defaultImageSrc;
+        }
         $description = $this->article->description;
         $siteName = $config->get( 'config.sitename' );
         $language = JFactory::getLanguage();
@@ -89,6 +105,12 @@ class StileroFBOpengraph{
             $this->isTagsAdded = TRUE;
         }
     }
-    
+    /**
+     * Sets a default image for the OG-tags
+     * @param string $imageSrc Source URL for the image (http://myserver.com/image.jpg)
+     */
+    protected function setDefaultImage($imageSrc){
+        $this->defaultImageSrc = $imageSrc;
+    }
     
 }
