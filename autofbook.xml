@@ -10,15 +10,15 @@
     <license>GPLv2</license>
     <description>This plugin automatically posts your articles on your FaceBook status. If you like this plugin, show your love and write a review at http://extensions.joomla.org</description>
     <install>
-        <sql>
-            <file driver="mysql" charset="utf8">autofbook/sql/autofbook_install.sql</file>
-        </sql>
+    <sql>
+        <file driver="mysql" charset="utf8">sql/install.sql</file>
+    </sql>
     </install>
     <uninstall>
         <sql>
-            <file driver="mysql" charset="utf8">autofbook/sql/autofbook_uninstall.sql</file>
+            <file driver="mysql" charset="utf8">sql/uninstall.sql</file>
         </sql>
-    </uninstall>
+    </uninstall>	
     <media destination="plg_autofbook">
         <folder>js</folder>
         <folder>images</folder>
@@ -26,7 +26,11 @@
     </media>
     <files>
         <filename plugin="autofbook">autofbook.php</filename>
+        <filename>helper.php</filename>
+        <filename>index.html</filename>
+        <folder>sql</folder>
         <folder>autofbook</folder>
+        <folder>library</folder>
     </files>
     <languages folder="language">
         <language tag="en-GB">en-GB.plg_system_autofbook.ini</language>

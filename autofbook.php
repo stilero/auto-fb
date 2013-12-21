@@ -1,29 +1,11 @@
 <?php
 /**
- * @version 4.4 2012-09-18 21:31 $
+ * @version 5.0 2013-12-22
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
- * 	@license	GPLv2
-* 	Joomla! is free software. This version may have been modified pursuant
-* 	to the GNU General Public License, and as distributed it includes or
-* 	is derivative of works licensed under the GNU General Public License or
-* 	other free or open source software licenses.
+ * @license	GPLv2
  * 
- *  This file is part of AutoFBook Plugin.
-
-    AutoFBook Plugin is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    AutoFBook Plugin is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with AutoFBook Plugin.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // no direct access
@@ -32,21 +14,35 @@ if(!defined('DS')){
     define('DS',DIRECTORY_SEPARATOR);
 }
 
-jimport('joomla.plugin.plugin');
+//jimport('joomla.plugin.plugin');
+jimport('joomla.event.plugin');
+JLoader::register('StileroAFBHelper', dirname(__FILE__).DS.'helper.php');
 
 // Initiate class to hold plugin events
 class PlgSystemAutofbook extends JPlugin {
-    var $config;
-    var $inBackend;
-    var $error = false;
-    var $CheckClass;
-    var $fbAppID;
-    var $fbAppSecret;
-    var $fbOauthAccessToken;
-    var $fbOauthCode;
-    var $classes;
-    var $jArticleClassNames;
-
+    protected $Facebook;
+    protected $AccessToken;
+    protected $Feed;
+    protected $Table;
+    protected $Article;
+    protected $ShareCheck;
+    protected $OpenGraph;
+    protected $inBackend;
+    protected $pageId;
+    protected $adminId;
+    protected $_appId;
+    protected $_appSecret;
+    protected $_authToken;
+    protected $_fbpageAuthToken;
+    protected $_addOgTags;
+    protected $_ogImageDefault;
+    protected $_inclOrExcl;
+    protected $_delay;
+    protected $_dateLimit;
+    protected $_catList;
+    protected $_allwaysPostOnSave;
+    protected $_isBackend;
+    
     const HTTP_STATUS_OK = '200';
     const ERROR_RETURNURL_NOT_SPECIFIED = '10';
     const ERROR_AUTHTOKENURL_NOT_SPECIFIED = '11';
@@ -55,82 +51,136 @@ class PlgSystemAutofbook extends JPlugin {
     const ERROR_COMMUNICATION_FAULT = '14';
     const ERROR_OAUTH_EXCEPTION = '50';
     const ERROR_OAUTH_OTHER = '55';
-
-
-
-    //Facebook parameters
-    var $access_token_url = "https://www.facebook.com/dialog/oauth"; 
-    var $authorization_scope = "scope=publish_stream,share_item,offline_access,manage_pages";
-    var $authorization_response_type = "response_type=token";
-    var $ogTagsAdded = false;
-
+    const TABLE_NAME = '#__autofbook_log';
+    const LANG_PREFIX = 'PLG_SYSTEM_AUTOFBOOK_';
+    const CLASS_PREFIX = 'StileroAFB';
+    
     public function __construct(&$subject, $config) {
         parent::__construct($subject, $config);
         $language = JFactory::getLanguage();
         $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, 'en-GB', true);
         $language->load('plg_system_autofbook', JPATH_ADMINISTRATOR, null, true);
-        $this->fbAppID = $this->params->def('fb_app_id');
-        $this->fbAppSecret = $this->params->def('fb_app_secret');
-        $this->fbOauthAccessToken = $this->params->def('auth_token');
-        $this->fbOauthCode = $this->params->def('auth_code');
-        $this->config = array(
-            'shareLogTableName'     =>      '#__autofbook_posted',
-            'pluginLangPrefix'      =>      'PLG_SYSTEM_AUTOFBOOK_',
-            'pluginElement'         =>      'autofbook',
-            'classFolder'           =>      'autofbook'.DS.'classes',
-            'articleClass'          =>      'afbJArticle',
-            'articleClassFile'      =>      'jArticle.php',
-            'fbookClass'            =>      'afbFBookClass',
-            'fbookClassFile'        =>      'fbookClass.php',
-            'jfbClass'              =>      'afbJFBClass',
-            'jfbClassFile'          =>      'jfbClass.php',
-            'shareControllerClass'  =>      'afbShareControllerClass',
-            'shareControllerFile'   =>      'stlShareControllerClass.php',
-            'fbControllerClass'     =>      'afbControllerClass',
-            'fbControllerFile'      =>      'fbControllerClass.php',
-            'fbPageID'              =>      $this->params->def('fb_page_id'),
-            'categoriesToShare'     =>      $this->params->def('section_id'),
-            'k2CategoriesToShare'   =>      $this->params->def('k2cats'),
-            'shareDelay'            =>      $this->params->def('delay'),
-            'articlesNewerThan'     =>      $this->params->def('items_newer_than'),
-            'addOGTags'             =>      $this->params->def('add_ogtags'),
-            'defaultOGImage'        =>      $this->params->def('og-img-default'),
-            'inclOrExcl'            =>      $this->params->def('incl_excl')
-        ); 
-        $this->classes = array(
-            'afbJArticle' => array(
-                'name'=>'afbJArticle',
-                'file'=>'jArticle.php'
-            ),
-            'afbFBookClass' => array(
-                'name'=>'afbFBookClass',
-                'file'=>'fbookClass.php'
-            ),
-            'afbJFBClass' => array(
-                'name'=>'afbJFBClass',
-                'file'=>'jfbClass.php'
-            ),
-            'afbShareControllerClass' => array(
-                'name'=>'afbShareControllerClass',
-                'file'=>'stlShareControllerClass.php'
-            ),
-            'afbControllerClass' => array(
-                'name'=>'afbControllerClass',
-                'file'=>'fbControllerClass.php'
-            )
-        );
-        $this->jArticleClassNames = array(
-            'com_article'       =>  'afbJArticle',
-            'com_content'       =>  'afbJArticle',
-            'com_k2'            =>  'k2Article',
-            'com_zoo'           =>  'zooArticle',
-            'com_virtuemart'    =>  'vmArticle'
-        );
-        $this->preloadClasses();
-        //JError::raiseNotice( 0,'afb-constructor-token1:'.$this->params->def('auth_token') );
-
+        StileroAFBHelper::importClasses();
+        $this->setParams();
     }
     
+    /**
+     * Reads the params and sets them in the class 
+     */
+    protected function setParams(){
+        $this->_delay = $this->params->def('delay');
+        $this->_dateLimit = $this->params->def('items_newer_than');
+        $this->_catList = $this->params->def('section_id');
+        $this->_addOgTags = $this->params->def('add_ogtags');
+        $this->_ogImageDefault = $this->params->def('og-img-default');
+        $this->_inclOrExcl = $this->params->def('incl_excl');
+        $this->adminId = $this->params->def('fbadmin_id');
+        $this->pageId = $this->params->def('fb_pages');
+        $this->_appId = $this->params->def('fb_app_id');
+        $this->_appSecret = $this->params->def('fb_app_secret');
+        $this->_authToken = $this->params->def('auth_token');
+    }
+    
+    /**
+     * Prepares for a FB Page call
+     */
+    protected function initFBPageCall(){
+        $response = $this->Facebook->User->getTokenForPageWithId($this->pageId);
+        $this->_fbpageAuthToken = StileroFBOauthResponse::handle($response);
+        $this->Facebook->Feed->setToken($this->_fbpageAuthToken);
+        $this->Facebook->Feed->setUserId($this->pageId);
+    }
+    
+    /**
+     * Checks if the post is to a personal wall or a page. It compares the page id
+     * with the admin id, and if they mat
+     * @return boolean true if personal post
+     */
+    protected function isPersonalPost(){
+            $this->Facebook->User->setUserId('me');
+            $me = $this->Facebook->User->me();
+            $user = StileroFBOauthResponse::handle($me);
+            if($user->id == $this->pageId){
+                $this->Facebook->Feed->setUserId('me');
+                $this->params->set('fb_pages', '');
+                StileroAFBPluginparamshelper::storeParams($this->params, 'autofbook');
+                return true;
+            }
+            
+        
+    }
+    
+    /**
+     * Initializes the classes and the FB-connection
+     * @param stdClass $article Joomla article/item object
+     * @param string $option the joomla option (com_content/com_k2) use the constants of the JArticle class
+     */
+    protected function init($article, $option){
+        $this->Table = new StileroAFBTable(self::TABLE_NAME);
+        $categories = $this->_catList==''? array() : explode(',', $this->_catList);
+        $this->ShareCheck = new StileroAFBSharecheck($article, $this->Table, $this->_delay, $this->_dateLimit, $categories, $this->_allwaysPostOnSave, $this->_isBackend, $option);
+        $redirectUri = JURI::root();
+        $this->Facebook = new StileroFBFacebook($this->_appId, $this->_appSecret, $redirectUri);
+        $this->Facebook->setAccessTokenFromToken($this->_authToken);
+        $this->Facebook->init();
+        $this->isPersonalPost();
+        if($this->pageId != ''){
+            if(!$this->isPersonalPost()){
+                $this->initFBPageCall();
+            }
+        }else{
+            $this->Facebook->Feed->setUserId('me');
+        }
+        $this->Article = $this->ShareCheck->getJArticle();
+    }
+
+    /**
+     * Stores the updated token to the plugin settings
+     */
+    protected function storeNewToken(){
+        $newToken = $this->Facebook->getToken();
+        $this->params->set('auth_token', $newToken);
+        StileroAFBPluginparamshelper::storeParams($this->params, 'autofbook');
+    }
+    
+    /**
+     * Wraps up after a call. Shows messages and updates tokens
+     * @param string $response JSON response from FB
+     */
+    protected function wrapUp($response){
+        $postResponse = StileroFBOauthResponse::handle($response);
+        if(isset($postResponse->id)){
+            //$this->storeNewToken();
+            $message = JText::_(self::LANG_PREFIX.'SUCCESS');
+            $this->Table->saveLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
+        }else if($postResponse == null){
+            $message = JText::_(self::LANG_PREFIX.'NULL');
+        }else{
+            $message = JText::_(self::LANG_PREFIX.'FAIL');
+        }
+        $this->_showMessage($message);
+    }
+    
+    /**
+     * Posts a link to FB
+     * @param string $context
+     * @param stdClass $article
+     * @param string $option
+     */
+    protected function postLink($context, $article, $option){
+        if(StileroAFBContextHelper::isArticle($context)){   
+            $this->init($article, $option);
+            if($this->ShareCheck->hasFullChecksPassed() ){
+                $link = $this->Article->url;
+                $title = $this->Article->title;
+                $caption = $this->Article->description;
+                $image = $this->Article->image;
+                $link = 'http://www.streetpeople.se';
+                $response = $this->Facebook->Feed->postLink($link, $title, '', $caption, $image);
+                $this->wrapUp($response);
+             }
+        }
+    }
     /**
      * Called after saving articles
      * 
@@ -141,49 +191,33 @@ class PlgSystemAutofbook extends JPlugin {
      * @since 1.6
      */
     public function onContentAfterSave($context, $article, $isNew) {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $this->inBackend = true;
-        $this->prepareToPost($article);
-        $this->postArticleToFB();
-        return;
+        $this->_isBackend = true;
+        $option = 'com_content';
+        if($context == StileroAFBContextHelper::K2_ITEM){
+            $option = 'com_k2';
+        }
+        $this->postLink($context, $article, $option);          
     }
     
-//    /**
-//     * Called after saving articles
-//     * 
-//     * @param type $article
-//     * @param type $isNew
-//     * @return void
-//     * @since 1.5
-//     */
-//    public function onAfterContentSave( &$article, $isNew ) {
-//       $this->inBackend = true;
-//        $this->prepareToPost($article);
-//        $this->postArticleToFB();
-//        return;
-//    }
-
+    /**
+     * Displays a Joomla message in backend.
+     * @param string $message The message to display
+     * @param string $type The type of message
+     */
+    protected function _showMessage($message, $type='message'){
+        $translatedMessage = JText::_(self::LANG_PREFIX.$translatedMessage);
+        if($this->_isBackend){
+            StileroAFBMessageHelper::show($translatedMessage, $type);
+        }
+    }
+    
+  
     public function onAfterK2Save(&$article, $isNew){
-        $this->inBackend = true;
-        $this->prepareToPost($article);
-        $this->postArticleToFB();
-        return;
+        $this->_isBackend = true;
+        $option = 'com_k2';
+        $this->postLink($context, $article, $option);    
     }
-//    /**
-//     * Called when articles are viewed in the frontend.
-//     * @param type $article
-//     * @param type $params
-//     * @param type $limitstart
-//     * @return void
-//     * @since 1.5
-//     */
-//    function onAfterDisplayContent( & $article, & $params, $limitstart=0) {
-//        $this->inBackend = false;
-//        $this->prepareToPost($article);
-//        $this->postArticleToFB();
-//        return;
-//    }
-    
+ 
     /**
      * Called when articles are viewed in the frontend
      * @param type $article
@@ -193,25 +227,13 @@ class PlgSystemAutofbook extends JPlugin {
      * @since 1.6
      */
     function onContentAfterDisplay( $context, &$article, &$params, $limitstart=0) {
+        return;
         $this->inBackend = false;
         $this->prepareToPost($article);
         $this->postArticleToFB();
         return;
     }
-  
-//    /**
-//     * Called in the frontend before the articles are rendered
-//     * @param type $article
-//     * @param type $params
-//     * @param type $limitstart
-//     * @return void
-//     * @since 1.5
-//     */
-//    function onPrepareContent(  &$article, &$params, $limitstart=0 ) {
-//        $this->prepareToPost($article);
-//        $this->insertOGTags($article);
-//        return;
-//    }
+
     /**
      * Called in the frontend before the articles are rendered
      * @param type $context
@@ -221,265 +243,13 @@ class PlgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */    
+
     function onContentPrepare( $context, &$article, &$params, $page=0 ) {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $isPrepared = $this->prepareToPost($article);
-        if($isPrepared){
-            $this->insertOGTags($article);
+        if(StileroAFBContextHelper::isArticle($context) && $this->_addOgTags){
+            $this->OpenGraph = new StileroFBOpengraph($article);
+            $this->OpenGraph->addTags();
         }
         return;
-    }
-    
-    function onAfterDispatch( ){
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $actualSignature = JRequest::getVar('signature');
-        $code = JRequest::getVar('code');
-        if( ($code == '') || ($actualSignature == '') ){
-            return;
-        }
-        if(!is_object($this->CheckClass)){
-                $this->setupClasses();
-        }
-        $expectedSignature = rawurldecode($this->CheckClass->getRequestSignature());
-        if( $actualSignature != $expectedSignature){
-            JError::raiseNotice( 0,'The signature sent to Facebook differs from the one received.' );
-             if (JDEBUG) JError::raiseNotice( 0,'Expected: '.$expectedSignature );
-             if (JDEBUG) JError::raiseNotice( 0,'Actual: '.$actualSignature );   
-            return;
-        }
-        if($code != '' ){
-            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." code: ".$code );
-            $this->params->set('auth_code', $code.'#_=_');
-            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." param: ".$this->params->toString() );
-            if(!is_object($this->CheckClass)){
-                $this->setupClasses();
-            }
-            $this->CheckClass->storeParams($this->params, $this->config['pluginElement']);
-            $this->inBackend = true;
-            $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'AUTHORIZED'), 'notice');
-        }
-    }
-    
-    private function prepareToPost($article){
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $this->setupClasses();
-        $articleObject = $this->loadJArticleClass($article);
-        if(!is_object($articleObject)){
-            return FALSE;
-        }
-        $this->CheckClass->setArticleObject($articleObject);
-        $hasId = isset($this->CheckClass->articleObject->id)? TRUE : FALSE;
-        $hasTitle = isset($this->CheckClass->articleObject->title)? TRUE : FALSE;
-        if(!$hasId || !$hasTitle){
-            return FALSE;
-        }
-        return TRUE;
-    }
-    
-    private function preloadClasses(){
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $classFolder = $this->config['classFolder'];
-        foreach ($this->classes as $class) {
-            JLoader::register(
-                $class['name'], 
-                dirname(__FILE__).DS.$classFolder.DS.$class['file']
-            );
-        }
-    }
-    
-    private function loadJArticleClass($article){
-      $component = JRequest::getVar('option');
-        if(array_key_exists($component, $this->jArticleClassNames)){
-            $className = $this->jArticleClassNames[$component];
-            JLoader::register( $className, dirname(__FILE__).DS.'autofbook'.DS.'classes'.DS.'jArticle.php');
-            $articleFactory = new $className($article);
-            $articleObject = $articleFactory->getArticleObj();
-            return $articleObject;
-        }
-        return false;
-   }
-    
-    private function setupClasses() {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $this->CheckClass = new $this->classes['afbControllerClass']['name']( 
-            array(
-                'fbAppID'               =>      $this->fbAppID,
-                'fbAppSecret'           =>      $this->fbAppSecret,
-                'fbOauthAccessToken'    =>      $this->fbOauthAccessToken,
-                'fbOauthCode'           =>      $this->fbOauthCode,
-                'fbPageID'              =>      $this->config['fbPageID'],
-                'shareLogTableName'     =>      $this->config['shareLogTableName'],
-                'pluginLangPrefix'      =>      $this->config['pluginLangPrefix'],
-                'categoriesToShare'     =>      $this->config['categoriesToShare'],
-                'k2CategoriesToShare'   =>      $this->config['k2CategoriesToShare'],
-                'shareDelay'            =>      $this->config['shareDelay'],
-                'articlesNewerThan'     =>      $this->config['articlesNewerThan'],
-                'inBackend'             =>      $this->inBackend,
-                'inclOrExcl'            =>      $this->config['inclOrExcl']
-            )
-        );
-    }
-    
-    private function postArticleToFB() {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        if( !$this->isInitialChecksOK() ) {
-            $this->displayMessage(JText::_($this->CheckClass->error['message']) , $this->CheckClass->error['type']);
-            return;
-        }
-        
-        if ( $this->CheckClass->shareLinkToFB() ) {
-            
-            //JError::raiseNotice( 0,'Before OK');
-            $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'OK'));
-            //JError::raiseNotice( 0,'After OK');
-            $token = $this->CheckClass->fbClass->getOauthAccessToken();
-            $this->params->set('auth_code', '');
-            $this->params->set('auth_token', $token);
-            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." param: ".$this->params->toString() );
-            if(!is_object($this->CheckClass)){
-                $this->setupClasses();
-            }
-            $this->CheckClass->storeParams($this->params, $this->config['pluginElement']);
-            return;
-        }else if( ($this->CheckClass->fbClass->getErrorCode() == self::ERROR_OAUTH_EXCEPTION) && $this->CheckClass->fbClass->getOauthAccessToken() != "" ){
-            $this->params->set('auth_code', '');
-            $this->params->set('auth_token', '');
-            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__." reseted Tokens and Code " );
-            if(!is_object($this->CheckClass)){
-                $this->setupClasses();
-            }
-            $this->CheckClass->storeParams($this->params, $this->config['pluginElement']);
-            $this->displayMessage(JText::_($this->config['pluginLangPrefix'].'OAUTHEXCEPT_RESETED'));
-            return;
-        }else{
-            //JError::raiseNotice( 0,'afb-postarticle-token2:'.$this->CheckClass->fbClass->getOauthAccessToken() );
-            JError::raiseNotice( 0,'Error occured');
-            JError::raiseNotice( 0,'error:'.$this->CheckClass->error['message']);
-            $this->displayMessage(JText::_($this->CheckClass->error['message']) , $this->CheckClass->error['type']);
-            return;
-        }
-    }
-    
-    private function doInitialChecks() {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $this->CheckClass->isServerSupportingRequiredFunctions();
-        $this->CheckClass->isServerSafeModeDisabled();
-        $this->CheckClass->isFBAppDetailsEntered();
-        $this->CheckClass->isArticleObjectIncluded();
-        $this->CheckClass->isItemPublished();
-        $this->CheckClass->isItemNewEnough();
-        $this->CheckClass->isItemPublic();
-        $this->CheckClass->isCategoryToShare();
-        $this->CheckClass->prepareTables();
-        $this->CheckClass->isSharingToEarly();
-        $this->CheckClass->isItemAlreadyShared();
-        return $this->CheckClass->error;
-    }
-
-    public function isInitialChecksOK() {
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__ );
-        $errorMessage = $this->doInitialChecks();
-        if ( $errorMessage != FALSE ) {
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    private function insertOGTags($article){
-        if( $this->params->def('add_ogtags')==0 || $this->ogTagsAdded ){
-            return;
-        }
-        $articleObject = $this->loadJArticleClass($article);
-        if(!$articleObject){
-            return;
-        }
-        $document = JFactory::getDocument();
-        $doctype    = $document->getType();
-        if ( $doctype !== 'html' ) { 
-            return; 
-        }
-        $metaDataArray = $this->getMetaDataArray($articleObject);
-        foreach ($metaDataArray as $key => $value) {
-            if($value !="") {
-                $metaProp = '<meta property="'.$key.'" content="'.$value.'" />';
-                $document->addCustomTag($metaProp);
-            }
-        }
-        $this->ogTagsAdded = true;
-    }
-
-    private function getMetaDataArray($article){
-        //$articleFactory = new jArticle($articleObj);
-        //$article = $articleFactory->getArticleObj();
-        $imageSrc = $this->CheckClass->articleObject->image;
-        //var_dump($this->CheckClass->articleObject);exit;
-        if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > article->image='.$imageSrc );
-        if($imageSrc == ''){
-            $imageSrc = JURI::root().'images/'.$this->params->def('og-img-default');
-            if (JDEBUG) JError::raiseNotice( 0,__CLASS__."->".__FUNCTION__.' > No images found, setting default: '.$imageSrc );
-        }
-        //$imageSrc = ( $imageSrc != '' )? $imageSrc : JURI::root().'images/'.$this->params->def('og-img-default');
-        $descNeedles = array("\n", "\r", "\"", "'");
-        //$desc = (isset($article->description) )? strip_tags( str_replace($descNeedles, " ", $article->description )) : "";
-        $desc = (isset($article->description) )? $article->description  : "";
-        $joomlaConfig = JFactory::getConfig();
-        $joomlaSiteName = $joomlaConfig->getValue( 'config.sitename' );
-        $langObj = JFactory::getLanguage();
-        $currentLang = str_replace( "-", "_", $langObj->getTag() );
-        $metaData = array(
-            'og:title'          =>  htmlentities(strip_tags( $article->title), ENT_QUOTES, "UTF-8"),
-            'og:image'          =>  $imageSrc,
-            'og:description'    =>  $desc,
-            'og:locale'         =>  $currentLang,
-            'og:type'           =>  'article',
-            'article:published_time'    =>  date('c', strtotime( $article->publish_up) ),
-            'article:section'           =>  htmlentities(strip_tags($article->category_title), ENT_QUOTES, "UTF-8"),
-            'article:modified_time'     =>  date('c', strtotime( $article->modified) ),
-            'og:site_name'      =>  $joomlaSiteName,
-            'og:url'            =>  $article->url
-        );
-        return $metaData;
-    }
-    
-    public function displayMessage($msg, $messageType = "") {
-        if(JDEBUG) JFactory::getApplication()->enqueueMessage( $msg, $messageType);
-        $isSetToDisplayMessages = ($this->params->def('pingmessages')==0)?false:true;
-        if( ! $isSetToDisplayMessages || ! $this->inBackend ){
-            return;
-        }
-        if($messageType == 'notice'){
-            $this->showNotice($msg);
-            return;
-        }else if($messageType == 'warning'){
-            $this->showWarning($msg);
-            return;
-        }
-        if($messageType == ""){
-            $app = JFactory::getApplication()->enqueueMessage( $msg);
-        }else{
-            $app = JFactory::getApplication()->enqueueMessage( $msg, $messageType);
-        }
-        
-    }
-    
-    public function showNotice($msg, $errorCode=0) {
-        if(JDEBUG) JError::raiseNotice( $errorCode, $msg );
-        $isSetToDisplayMessages = ($this->params->def('pingmessages')==0)?false:true;
-        if( ! $isSetToDisplayMessages || ! $this->inBackend ){
-            return;
-        }else{
-             JError::raiseNotice( $errorCode, $msg );
-        }
-    }
-    
-    public function showWarning($msg, $errorCode=0) {
-        if(JDEBUG) JError::raiseWarning( $errorCode, $msg );
-        $isSetToDisplayMessages = ($this->params->def('pingmessages')==0)?false:true;
-        if( ! $isSetToDisplayMessages || ! $this->inBackend ){
-            return;
-        }else{
-             JError::raiseWarning( $errorCode, $msg );
-        }
     }
     
 } // END CLASS

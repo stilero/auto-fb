@@ -114,6 +114,7 @@ class afbFBookClass {
         $graphURL = $this->config['graphURL'].$fbPageID."feed";
         $this->setDebugInfo('Posting Link: '.$graphURL.'?'.  http_build_query($postvars));
         $response = $this->query($graphURL, $postvars);
+        
         $this->handleResponse($response);
         return !$this->hasErrorOccured();
     }
