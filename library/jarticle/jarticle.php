@@ -3,7 +3,7 @@
 /**
  * A Factory Class for creating standardised article objects 
  *
- * @version  3.1
+ * @version  3.2
  * @package Stilero
  * @subpackage plg_twittertweet
  * @author Daniel Eliasson <daniel at stilero.com>
@@ -225,12 +225,18 @@ class StileroAFBJarticle {
         return StileroAFBTagsHelper::tags($Article->metakey);
     }
     
+    /**
+     * Returns the locale of the article, and if none found the website locale is returned.
+     * @param stdClass $Article
+     * @return string Language code
+     */
     protected function lang($Article){
-        $lang = '*';
+        $language = JFactory::getLanguage();
+        $locale = str_replace( "-", "_", $language->getTag() );
         if(isset($Article->lang)){
-            $lang = $Article->lang;
+            $locale = $Article->lang;
         }
-        return $lang;
+        return $locale;
     }
 }
 
