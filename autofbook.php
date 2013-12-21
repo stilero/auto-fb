@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 5.0 2013-12-22
+ * @version 5.1 2013-12-22
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
@@ -72,7 +72,7 @@ class PlgSystemAutofbook extends JPlugin {
         $this->_dateLimit = $this->params->def('items_newer_than');
         $this->_catList = $this->params->def('section_id');
         $this->_addOgTags = $this->params->def('add_ogtags');
-        $this->_ogImageDefault = $this->params->def('og-img-default');
+        $this->_ogImageDefault = JURI::root().'images/'.$this->params->def('og-img-default');
         $this->_inclOrExcl = $this->params->def('incl_excl');
         $this->adminId = $this->params->def('fbadmin_id');
         $this->pageId = $this->params->def('fb_pages');
