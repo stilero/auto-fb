@@ -109,7 +109,7 @@ class StileroFBOpengraph{
      * Sets a default image for the OG-tags
      * @param string $imageSrc Source URL for the image (http://myserver.com/image.jpg)
      */
-    protected function setDefaultImage($imageSrc){
+    public function setDefaultImage($imageSrc){
         $this->defaultImageSrc = $imageSrc;
     }
     

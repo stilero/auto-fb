@@ -181,6 +181,19 @@ class PlgSystemAutofbook extends JPlugin {
              }
         }
     }
+    
+    /**
+     * Displays a Joomla message in backend.
+     * @param string $message The message to display
+     * @param string $type The type of message
+     */
+    protected function _showMessage($message, $type='message'){
+        $translatedMessage = JText::_(self::LANG_PREFIX.$message);
+        if($this->_isBackend){
+            StileroAFBMessageHelper::show($translatedMessage, $type);
+        }
+    }
+        
     /**
      * Called after saving articles
      * 
@@ -196,22 +209,11 @@ class PlgSystemAutofbook extends JPlugin {
         if($context == StileroAFBContextHelper::K2_ITEM){
             $option = 'com_k2';
         }
-        $this->postLink($context, $article, $option);          
+        if(StileroAFBContextHelper::isArticle($context)){
+            $this->postLink($context, $article, $option); 
+        }          
     }
-    
-    /**
-     * Displays a Joomla message in backend.
-     * @param string $message The message to display
-     * @param string $type The type of message
-     */
-    protected function _showMessage($message, $type='message'){
-        $translatedMessage = JText::_(self::LANG_PREFIX.$translatedMessage);
-        if($this->_isBackend){
-            StileroAFBMessageHelper::show($translatedMessage, $type);
-        }
-    }
-    
-  
+      
     public function onAfterK2Save(&$article, $isNew){
         $this->_isBackend = true;
         $option = 'com_k2';
@@ -227,11 +229,14 @@ class PlgSystemAutofbook extends JPlugin {
      * @since 1.6
      */
     function onContentAfterDisplay( $context, &$article, &$params, $limitstart=0) {
-        return;
-        $this->inBackend = false;
-        $this->prepareToPost($article);
-        $this->postArticleToFB();
-        return;
+        $this->_isBackend = FALSE;
+        $option = 'com_content';
+        if($context == StileroAFBContextHelper::K2_ITEM){
+            $option = 'com_k2';
+        }
+        if(StileroAFBContextHelper::isArticle($context)){
+            $this->postLink($context, $article, $option); 
+        }
     }
 
     /**
@@ -247,6 +252,7 @@ class PlgSystemAutofbook extends JPlugin {
     function onContentPrepare( $context, &$article, &$params, $page=0 ) {
         if(StileroAFBContextHelper::isArticle($context) && $this->_addOgTags){
             $this->OpenGraph = new StileroFBOpengraph($article);
+            $this->OpenGraph->setDefaultImage($this->_ogImageDefault);
             $this->OpenGraph->addTags();
         }
         return;

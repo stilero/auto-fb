@@ -3,7 +3,7 @@
 /**
  * A Factory Class for creating standardised article objects 
  *
- * @version  3.0
+ * @version  3.1
  * @package Stilero
  * @subpackage plg_twittertweet
  * @author Daniel Eliasson <daniel at stilero.com>
@@ -46,6 +46,7 @@ class StileroAFBJarticle {
         $tempClass->url = $this->url($article);
         $tempClass->tags = $this->tags($article);
         $tempClass->component = JRequest::getCmd('option');
+        $tempClass->lang = lang();
         $this->Article = $tempClass;
     }
     
@@ -222,6 +223,14 @@ class StileroAFBJarticle {
      */
     protected function tags($Article){
         return StileroAFBTagsHelper::tags($Article->metakey);
+    }
+    
+    protected function lang($Article){
+        $lang = '*';
+        if(isset($Article->lang)){
+            $lang = $Article->lang;
+        }
+        return $lang;
     }
 }
 
