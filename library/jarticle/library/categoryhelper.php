@@ -55,4 +55,24 @@ class StileroAFBCategoryHelper{
     public static function slugFromId($catid){
         return self::slug($catid, self::aliasFromID($catid));
     }
+    
+    /**
+     * Get all the content categories in an associate object list
+     * @param boolean $onlyPublished Set true to only get published categories
+     * @return stdClass Assoc Object list with the categories found
+     */
+    static function getCategories($onlyPublished=true){
+        $db = JFactory::getDBO();
+        $query = $db->getQuery(true);
+        $query->select('id, title');
+        $query->from($db->quoteName('#__categories'));
+        $query->where('extension = '.$db->quote('com_content'));
+        if($onlyPublished){
+            $query->where('published = 1');
+        }
+        $query->order('title');
+        $db->setQuery($query);    
+        $result = $db->loadAssocList();
+        return $result;
+    }
 }
