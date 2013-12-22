@@ -152,11 +152,12 @@ class PlgSystemAutofbook extends JPlugin {
         if(isset($postResponse->id)){
             //$this->storeNewToken();
             $message = JText::_(self::LANG_PREFIX.'SUCCESS');
-            $this->Table->saveLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
         }else if($postResponse == null){
             $message = JText::_(self::LANG_PREFIX.'NULL');
+            $this->Table->deleteLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
         }else{
             $message = JText::_(self::LANG_PREFIX.'FAIL');
+            $this->Table->deleteLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
         }
         $this->showMessage($message);
     }
@@ -171,11 +172,11 @@ class PlgSystemAutofbook extends JPlugin {
         if(StileroAFBContextHelper::isArticle($context)){   
             $this->init($article, $option);
             if($this->ShareCheck->hasFullChecksPassed() ){
+                $this->Table->saveLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
                 $link = $this->Article->url;
                 $title = $this->Article->title;
                 $caption = $this->Article->description;
                 $image = $this->Article->image;
-                $link = 'http://www.streetpeople.se';
                 $response = $this->Facebook->Feed->postLink($link, $title, '', $caption, $image);
                 $this->wrapUp($response);
              }

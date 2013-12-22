@@ -53,13 +53,8 @@ class StileroFBOauthAccesstoken extends StileroOauthCommunicator{
      * @return string Token
      */
     public function tokenFromResponse($response){
-        $responses = explode('&', $response);
-        $token = '';
-        foreach ($responses as $resp) {
-            $respParts = explode('=', $resp);
-            $token = $respParts[1];
-        }
-        $this->token = $token;
+        parse_str($response);
+        $this->token = $access_token;
     }
     
     /**

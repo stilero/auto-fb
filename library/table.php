@@ -94,6 +94,26 @@ class StileroAFBTable{
     }
     
     /**
+     * Deletes a log to the database.
+     * @param int $id article/item id
+     * @param int $catid Category id
+     * @param string $url Article/Item url
+     * @param string $lang Language code string
+     */
+    public function deleteLog($id, $catid, $url, $lang, $component){
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->delete($this->_table);
+        $query->where('article_id='.(int)$id);
+        $query->where('cat_id='.(int)$catid);
+        $query->where('articlelink='.$db->quote($url));
+        $query->where('component='.$db->quote($component));
+        $query->where('language='.$db->quote($lang));
+        $db->setQuery($query);
+        $db->query();
+    }
+    
+    /**
      * Checks if a log is found for the article id provided
      * @param int $id Article id
      * @return boolean True if found

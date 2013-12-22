@@ -25,12 +25,12 @@ class JError{
        $response = <<<EOD
 {
    "error": {
-      "code": "$errCode",
+      "code": "$code",
       "type": "OAuthException",
-      "message": "$errDesc"
+      "message": "$message"
    }
 }
 EOD;
-       print $response;exit;
+       print $response;
     }
 }

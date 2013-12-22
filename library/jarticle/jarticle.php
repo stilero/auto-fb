@@ -46,7 +46,7 @@ class StileroAFBJarticle {
         $tempClass->url = $this->url($article);
         $tempClass->tags = $this->tags($article);
         $tempClass->component = JRequest::getCmd('option');
-        $tempClass->lang = $this->lang();
+        $tempClass->lang = $this->lang($article);
         $this->Article = $tempClass;
     }
     
