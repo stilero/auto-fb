@@ -3,7 +3,7 @@
  * StileroTTCategory
  * Class for handling Category methods
  *
- * @version  1.0
+ * @version  1.1
  * @package Stilero
  * @subpackage plg_twittertweet
  * @author Daniel Eliasson <daniel at stilero.com>
