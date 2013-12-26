@@ -52,6 +52,7 @@ class PlgSystemAutofbook extends JPlugin {
     const ERROR_OAUTH_EXCEPTION = '50';
     const ERROR_OAUTH_OTHER = '55';
     const TABLE_NAME = '#__autofbook_log';
+    const TABLE_NAME_QUEUE = '#__autofbook_queue';
     const LANG_PREFIX = 'PLG_SYSTEM_AUTOFBOOK_';
     const CLASS_PREFIX = 'StileroAFB';
     
@@ -152,14 +153,16 @@ class PlgSystemAutofbook extends JPlugin {
         if(isset($postResponse->id)){
             //$this->storeNewToken();
             $message = JText::_(self::LANG_PREFIX.'SUCCESS');
+            $this->showMessage($message);
         }else if($postResponse == null){
             $message = JText::_(self::LANG_PREFIX.'NULL');
+            JError::raiseNotice(0, $message);
             $this->Table->deleteLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
         }else{
             $message = JText::_(self::LANG_PREFIX.'FAIL');
+             JError::raiseNotice(0, $message);
             $this->Table->deleteLog($this->Article->id, $this->Article->catid, $this->Article->url, $this->Article->lang, $this->Article->component);
         }
-        $this->showMessage($message);
     }
     
     /**

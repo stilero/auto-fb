@@ -2,7 +2,7 @@
 /**
  * Convenient class for contexts
  *
- * @version  1.0
+ * @version  1.1
  * @package Stilero
  * @author Daniel Eliasson <daniel at stilero.com>
  * @copyright  (C) 2013-sep-15 Stilero Webdesign (http://www.stilero.com)
@@ -40,6 +40,19 @@ class StileroAFBContextHelper{
      */
     public static function isArticle($context){
         if(in_array($context, self::articleContexts())){
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+    }
+    
+    /**
+     * Checks if the current context is an image
+     * @param string $context
+     * @return boolean True if current context is image
+     */
+    public static function isImage($context){
+        if($context == self::MEDIA_FILE){
             return TRUE;
         }else{
             return FALSE;
