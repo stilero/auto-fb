@@ -214,12 +214,8 @@ class PlgSystemAutofbook extends JPlugin {
         if(StileroAFBContextHelper::isArticle($context)){
             $this->postLink($context, $item, $option); 
         }else if(StileroAFBContextHelper::isImage($context)){
-            $photo = new StileroAFBIptc($item->filepath);
-            $photo->title;
-            JError::raiseNotice(0, $photo->title.' - '.$photo->description);
-            var_dump($photo);exit;
-        }else{
-            JError::raiseNotice(0, $context);
+            //$photo = new StileroAFBExif($item->filepath);
+            //var_dump($photo);exit;
         }         
     }
       
