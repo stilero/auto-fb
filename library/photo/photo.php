@@ -16,48 +16,21 @@ defined('_JEXEC') or die('Restricted access');
 
 class StileroAFBPhoto{
     
-    protected $exif = array();
-    protected $iptc = array();
+    protected $Exif;
+    protected $Iptc;
     protected $filename;
-    
-    const FILETYPE_JPEG = 'image/jpeg';
-    const FILETYPE_PNG = 'image/png';
     
     public function __construct($filename='') {
         $this->filename = $filename;
+        $this->Exif = new StileroAFBExif($filename);
+        $this->Iptc = new StileroAFBIptc($filename);
     }
     
-    /**
-     * Checks if the provided file is a photo
-     * @param string $filename Full image filename, and not URL.
-     * @return int returns the filetype and false if not a photo
-     */
-    public static function isPhoto($filename){
-        return exif_imagetype($filename);
-    }
-    
-    /**
-     * Reads the EXIF data of a photo file.
-     * @param string $filename Full image filename, and not URL.
-     */
-    protected function readExif(){
-        $this->exif = exif_read_data($this->filename);
-    }
-    
-    protected function readIptcData(){
-        $size = getimagesize($this->filename, $info);
-        $iptc=array();
-        if(is_array($info)){
-            $iptc = iptcparse($info['APP13']); 
-        }
-        $this->iptc = $iptc;
-    }
-    public function getIptc(){
-        $this->readIptcData();
-        return $this->iptc;
-    }
     public function getExif(){
-        $this->readExif();
-        return $this->exif;
+        return $this->Exif;
+    }
+    
+    public function getIPTC(){
+        return $this->Iptc;
     }
 }
