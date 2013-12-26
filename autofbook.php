@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 5.2 2013-12-22
+ * @version 5.2
  * @package AutoFBook Plugin
  * @author    Daniel Eliasson Stilero AB - http://www.stilero.com
  * @copyright	Copyright (c) 2011 Stilero AB. All rights reserved.
@@ -107,8 +107,6 @@ class PlgSystemAutofbook extends JPlugin {
                 StileroAFBPluginparamshelper::storeParams($this->params, 'autofbook');
                 return true;
             }
-            
-        
     }
     
     /**
@@ -207,15 +205,22 @@ class PlgSystemAutofbook extends JPlugin {
      * @return void
      * @since 1.6
      */
-    public function onContentAfterSave($context, $article, $isNew) {
+    public function onContentAfterSave($context, $item, $isNew) {
         $this->_isBackend = true;
         $option = 'com_content';
         if($context == StileroAFBContextHelper::K2_ITEM){
             $option = 'com_k2';
         }
         if(StileroAFBContextHelper::isArticle($context)){
-            $this->postLink($context, $article, $option); 
-        }          
+            $this->postLink($context, $item, $option); 
+        }else if(StileroAFBContextHelper::isImage($context)){
+            $photo = new StileroAFBIptc($item->filepath);
+            $photo->title;
+            JError::raiseNotice(0, $photo->title.' - '.$photo->description);
+            var_dump($photo);exit;
+        }else{
+            JError::raiseNotice(0, $context);
+        }         
     }
       
     public function onAfterK2Save(&$article, $isNew){

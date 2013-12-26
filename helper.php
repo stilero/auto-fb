@@ -35,6 +35,9 @@ define('PATH_LIBRARY_JARTICLE_LIBRARY', PATH_LIBRARY_JARTICLE.'library'.DS);
 //OPEN GRAPH LIBRARY
 define('PATH_LIBRARY_OGLIBRARY', PATH_LIBRARY.'opengraph'.DS);
 
+//PHOTO PATHS
+define('PATH_LIBRARY_PHOTO', PATH_LIBRARY.'photo'.DS);
+
 class StileroAFBHelper{
    /**
      * Imports all classes used to the autoloader of Joomla
@@ -61,5 +64,8 @@ class StileroAFBHelper{
         
         //OPENGRAPH LIBRARIES
         JLoader::discover('StileroFB', PATH_LIBRARY_OGLIBRARY);
+        
+        //OPENGRAPH LIBRARIES
+        JLoader::discover('StileroAFB', PATH_LIBRARY_PHOTO);
     }
 }
