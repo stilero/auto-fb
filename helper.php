@@ -67,5 +67,6 @@ class StileroAFBHelper{
         
         //OPENGRAPH LIBRARIES
         JLoader::discover('StileroAFB', PATH_LIBRARY_PHOTO);
+        JLoader::discover('StileroAFB', PATH_LIBRARY.'queue'.DS);
     }
 }
