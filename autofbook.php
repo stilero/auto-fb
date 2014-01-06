@@ -116,7 +116,12 @@ class PlgSystemAutofbook extends JPlugin {
      */
     protected function init($article, $option){
         $this->Table = new StileroAFBTable(self::TABLE_NAME);
-        $categories = $this->_catList==''? array() : explode(',', $this->_catList);
+        if($this->_catList == ''){
+            $this->_catList = array();
+        }else if(!is_array($this->_catList)){
+            $this->_catList = explode(',', $this->_catList);
+        }
+        $categories = $this->_catList;
         $this->ShareCheck = new StileroAFBSharecheck($article, $this->Table, $this->_delay, $this->_dateLimit, $categories, $this->_allwaysPostOnSave, $this->_isBackend, $option);
         $redirectUri = JURI::root();
         $this->Facebook = new StileroFBFacebook($this->_appId, $this->_appSecret, $redirectUri);
