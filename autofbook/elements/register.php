@@ -18,7 +18,7 @@ defined('_JEXEC') or die('Restricted access');
 class JFormFieldRegister extends JFormField {
     
     protected $type = 'register';
-    const REGISTER_URL = 'https://developers.facebook.com/setup';
+    const REGISTER_URL = 'https://developers.facebook.com/apps/';
     /**
      * Returns the HTML for the form input
      * @return string HTML

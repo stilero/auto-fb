@@ -99,27 +99,39 @@ class StileroAFBSharecheck{
     public function hasFullChecksPassed(){
         $isSuccessful = true;
         if(!StileroAFBServerRequirementHelper::hasCurlSupport()) {
-            throw new Exception('TwitterTweet: Server Missing Curl support.'); 
+            if($this->_isBackend){
+                throw new Exception('AutoFBook: Server Missing Curl support.'); 
+            }
             $isSuccessful = false;
         }
         if(!StileroAFBServerRequirementHelper::hasFileGetSupport()){
-            throw new Exception('TwitterTweet: Server Missing Support for file_get_contents');
+            if($this->_isBackend){
+                throw new Exception('AutoFBook: Server Missing Support for file_get_contents');
+            }
             $isSuccessful = false;
         } 
         if(!$this->_JArticle->isPublished) {
-            throw new Exception('Aleady published');
+            if($this->_isBackend){
+                JError::raiseNotice( 100, 'Aleady published' );
+            }
             $isSuccessful = false;
         } 
         if(!$this->_JArticle->isPublic) {
-            throw new Exception('Not public');
+            if($this->_isBackend){
+                JError::raiseNotice( 100, 'Not public');
+            }
             $isSuccessful = false;
         } 
         if( (!self::isANewerThanB($this->_JArticle->publish_up, $this->_dateLimit)) && ($this->_dateLimit != '') ){
-            throw new Exception('Too old');
+            if($this->_isBackend){
+                JError::raiseNotice( 100, 'Too old');
+            }
             $isSuccessful = false;
         }
         if( !in_array($this->_JArticle->catid, $this->_categories) && !empty($this->_categories)){
-            throw new Exception('Not a category to post');
+            if($this->_isBackend){
+                JError::raiseNotice( 100, 'Not a category to post');
+            }
             $isSuccessful = false;
         }
         if(!$this->_Table->isTableFound()){

@@ -24,19 +24,32 @@ class afbK2Categories{
      * @return boolean True if K2 is installed
      */
     static function isK2Installed(){
-        // Ignore warnings because component may not be installed
-        $warnHandlers = JERROR::getErrorHandling( E_WARNING );
-        JERROR::setErrorHandling( E_WARNING, 'ignore' );
-
-        // Check if component is installed
-        if ( !JComponentHelper::isEnabled( 'com_k2', true) ) {
-           return FALSE;
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query->select('*')->from('#__extensions');
+        $query->where('element = '.$db->quote('com_k2'));
+        $query->where('enabled = 1');
+        $db->setQuery($query);
+        $result = $db->loadAssoc();
+        if($result != null){
+            return true;
+        }else{
+            return false;
         }
-        // Reset the warning handler(s)
-        foreach( $warnHandlers as $mode ) {
-           JERROR::setErrorHandling( E_WARNING, $mode );
-        };
-        return true;
+//        
+//        // Ignore warnings because component may not be installed
+//        $warnHandlers = JERROR::getErrorHandling( E_WARNING );
+//        JERROR::setErrorHandling( E_WARNING, 'ignore' );
+//
+//        // Check if component is installed
+//        if ( !JComponentHelper::isEnabled( 'com_k2', true) ) {
+//           return FALSE;
+//        }
+//        // Reset the warning handler(s)
+//        foreach( $warnHandlers as $mode ) {
+//           JERROR::setErrorHandling( E_WARNING, $mode );
+//        };
+//        return true;
     }
     
     /**
@@ -50,10 +63,10 @@ class afbK2Categories{
         $db = JFactory::getDBO();
         $query = $db->getQuery(true);
         $query->select('id, name');
-        $query->from($db->quoteName('#__k2_categories'));
+        $query->from('#__k2_categories');
         $query->where('published = 1');
         $query->order('name');
-        $db->setQuery($query);    
+        $db->setQuery($query);
         $result = $db->loadAssocList();
         return $result;
     }
